@@ -1,0 +1,282 @@
+# =============================================================================
+# School Management System -- .gitignore
+# =============================================================================
+# This file ensures that only source code, documentation, and configuration
+# files are tracked in version control. All generated files, build artifacts,
+# secrets, and temporary files are excluded.
+
+# -----------------------------------------------------------------------------
+# .NET / ASP.NET Core Build Artifacts
+# -----------------------------------------------------------------------------
+**/bin/
+**/obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.pidb
+*.booproj
+*.cache
+*.dll
+*.exe
+*.pdb
+*.xml
+*.csproj.user
+*.vbproj.user
+*.fsproj.user
+
+# -----------------------------------------------------------------------------
+# NuGet Packages and Package Management
+# -----------------------------------------------------------------------------
+**/.nuget/
+*.nupkg
+**/packages/
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+**/Properties/launchSettings.json
+
+# -----------------------------------------------------------------------------
+# Visual Studio and IDE Files
+# -----------------------------------------------------------------------------
+.vs/
+**/*.vcxproj.filters
+**/_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+*.vspscc
+*.vssscc
+._ss/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# -----------------------------------------------------------------------------
+# Build and Publish Output
+# -----------------------------------------------------------------------------
+publish/
+**/publish/
+[Pp]ublish/
+[Aa]pp[Pp]ublish/
+[Dd]ebug/
+[Rr]elease/
+[Dd]ebugPublic/
+[Rr]eleases/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+
+# -----------------------------------------------------------------------------
+# Entity Framework and Database
+# -----------------------------------------------------------------------------
+# Keep migrations but ignore auto-generated snapshots
+**/Migrations/*/ModelSnapshot.cs
+# Uncomment to exclude all migrations if using script-based migrations:
+# **/Migrations/
+*.mdf
+*.ldf
+*.ndf
+*.sdf
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+
+# -----------------------------------------------------------------------------
+# Application Logs and Diagnostics
+# -----------------------------------------------------------------------------
+logs/
+*.log
+LogFiles/
+DataProtection-Keys/
+*.etl
+*.etwx
+
+# -----------------------------------------------------------------------------
+# Test Results and Coverage
+# -----------------------------------------------------------------------------
+TestResults/
+coverage/
+*.trx
+*.coverage
+*.coveragexml
+*.testlog
+*.vspx
+*.html
+*.coverlet
+*.testlog
+
+# -----------------------------------------------------------------------------
+# Frontend -- Next.js / Node.js
+# -----------------------------------------------------------------------------
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/dist/
+frontend/.pnp
+frontend/.pnp.js
+frontend/.yarn/install-state.gz
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+frontend/.vercel
+frontend/.turbo
+
+# -----------------------------------------------------------------------------
+# Package Manager Debug Logs
+# -----------------------------------------------------------------------------
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+pnpm-debug.log*
+
+# -----------------------------------------------------------------------------
+# Environment Variables and Secrets -- NEVER COMMIT
+# -----------------------------------------------------------------------------
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/.env.*.local
+
+# -----------------------------------------------------------------------------
+# Docker and Container Files
+# -----------------------------------------------------------------------------
+.dockerignore
+docker-compose.override.yml
+docker-compose.*.yml
+!docker-compose.yml
+!docker-compose.prod.yml
+
+# -----------------------------------------------------------------------------
+# OS and System Files
+# -----------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# -----------------------------------------------------------------------------
+# IDE and Editor Files
+# -----------------------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# -----------------------------------------------------------------------------
+# Temporary and Backup Files
+# -----------------------------------------------------------------------------
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+~*
+*.swp
+*.swo
+.#*
+\#*#
+*.*.swp
+*.*.swo
+
+# -----------------------------------------------------------------------------
+# AI Tooling and Local Development Files
+# -----------------------------------------------------------------------------
+.claude/
+PROMPT_*.md
+AI_*.md
+*.ai-chat
+*.conversation
+
+# -----------------------------------------------------------------------------
+# Security and Certificate Files
+# -----------------------------------------------------------------------------
+*.pfx
+*.p12
+*.key
+*.pem
+*.crt
+*.cer
+*.csr
+*.p7b
+*.p7c
+*.p7r
+*.p7s
+*.scb
+*.spc
+*.pvk
+*.vskey
+
+# -----------------------------------------------------------------------------
+# Archive and Compressed Files
+# -----------------------------------------------------------------------------
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+*.gz
+*.bz2
+*.xz
+
+# -----------------------------------------------------------------------------
+# Large Media Files (should be in uploads/ not tracked)
+# -----------------------------------------------------------------------------
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.flv
+*.webm
+*.mp3
+*.wav
+*.flac
+*.aac
+*.ogg
+
+# -----------------------------------------------------------------------------
+# Documentation Build Output
+# -----------------------------------------------------------------------------
+docs/_build/
+docs/.doctrees/
+docs/_static/
+docs/_templates/
+
+# -----------------------------------------------------------------------------
+# Performance Profiling
+# *.psess
+# *.vsp
+# *.vspx
+# *.sap
