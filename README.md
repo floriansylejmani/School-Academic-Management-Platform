@@ -2,73 +2,160 @@
 
 ![.NET 9](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet)
 ![Next.js 15](https://img.shields.io/badge/Next.js-15-000000?logo=nextdotjs)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql)
+![PostgreSQL 16](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql)
+![Tests](https://img.shields.io/badge/Tests-296%20passed-brightgreen)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green)
-![Production Ready](https://img.shields.io/badge/Production-Ready-brightgreen)
+![Production Oriented](https://img.shields.io/badge/Production-Oriented-blue)
 
-> **A comprehensive, production-grade school management platform designed for educational institutions of all sizes.**
+> **A production-oriented school management platform built with ASP.NET Core 9, Next.js 15, PostgreSQL, SignalR, and automated integration testing.**
 
 ---
 
 ## Product Overview
 
-The School Management System is a **complete, turnkey solution** that modernizes educational administration through powerful role-based portals, real-time communication, and intelligent automation. Built with enterprise-grade security and scalability in mind, this platform serves as the digital backbone for schools, colleges, and educational centers.
+The School Management System is a full-stack educational administration platform for schools, colleges, training centers, and academic programs. It provides role-based portals for administrators, teachers, students, and parents, with tools for academic operations, communication, attendance, grading, fees, reports, and notifications.
+
+The project is designed as a professional portfolio and academic submission: it uses Clean Architecture on the backend, a modern TypeScript frontend, PostgreSQL persistence, JWT authentication, Docker Compose deployment, and a verified automated test suite.
 
 ### Why This Product Matters
 
-Educational institutions worldwide struggle with fragmented systems, manual processes, and communication gaps. Our platform solves these challenges by providing:
+Educational institutions often rely on disconnected tools for administration, communication, finance, and reporting. This system brings those workflows into one structured platform:
 
-- **Unified Administration**: Single platform for all school operations
-- **Role-Based Access**: Tailored experiences for admins, teachers, students, and parents
-- **Real-Time Communication**: Instant notifications and updates
-- **Data-Driven Insights**: Comprehensive reporting and analytics
-- **Enterprise Security**: Production-grade security with audit trails
+- **Unified Administration**: Students, teachers, parents, classes, subjects, exams, fees, and reports in one system
+- **Role-Based Access**: Dedicated experiences for Admin, Teacher, Student, and Parent users
+- **Real-Time Communication**: SignalR-powered notifications and live updates
+- **Data-Driven Workflows**: Attendance, results, payments, and reporting backed by structured data
+- **Security-Focused Design**: JWT authentication, RBAC, validation, rate limiting, audit logging, and security headers
+
+---
+
+## Verified Quality Status
+
+| Area                               |                   Status |
+| ---------------------------------- | -----------------------: |
+| Backend tests                      |           **152 passed** |
+| Frontend tests                     |           **144 passed** |
+| Total verified tests               |           **296 passed** |
+| Frontend lint                      | **0 errors, 0 warnings** |
+| Frontend build                     |            **Succeeded** |
+| PostgreSQL/Testcontainers tests    |               **Passed** |
+| SignalR integration tests          |               **Passed** |
+| Security integration tests         |               **Passed** |
+| File upload security tests         |               **Passed** |
+| Payment idempotency tests          |               **Passed** |
+| Pagination validation tests        |               **Passed** |
+| Startup configuration safety tests |               **Passed** |
+
+---
+
+## Application Screenshots
+
+Screenshots are expected in `docs/screenshots/`.
+
+| Login                                | Admin Dashboard                                          |
+| ------------------------------------ | -------------------------------------------------------- |
+| ![Login](docs/screenshots/login.png) | ![Admin Dashboard](docs/screenshots/admin-dashboard.png) |
+
+| Students                                   | Teachers                                   |
+| ------------------------------------------ | ------------------------------------------ |
+| ![Students](docs/screenshots/students.png) | ![Teachers](docs/screenshots/teachers.png) |
+
+| Parents                                  | Classes                                  |
+| ---------------------------------------- | ---------------------------------------- |
+| ![Parents](docs/screenshots/parents.png) | ![Classes](docs/screenshots/classes.png) |
+
+| Subjects                                   | Timetable                                    |
+| ------------------------------------------ | -------------------------------------------- |
+| ![Subjects](docs/screenshots/subjects.png) | ![Timetable](docs/screenshots/timetable.png) |
+
+| Attendance Register                                              | Attendance History                                             |
+| ---------------------------------------------------------------- | -------------------------------------------------------------- |
+| ![Attendance Register](docs/screenshots/attendance-register.png) | ![Attendance History](docs/screenshots/attendance-history.png) |
+
+| Exams                                | Results                                  |
+| ------------------------------------ | ---------------------------------------- |
+| ![Exams](docs/screenshots/exams.png) | ![Results](docs/screenshots/results.png) |
+
+| Fees                               | Payments                                   |
+| ---------------------------------- | ------------------------------------------ |
+| ![Fees](docs/screenshots/fees.png) | ![Payments](docs/screenshots/payments.png) |
+
+| Reports                                  | Notifications                                        |
+| ---------------------------------------- | ---------------------------------------------------- |
+| ![Reports](docs/screenshots/reports.png) | ![Notifications](docs/screenshots/notifications.png) |
+
+| Submissions                                      |     |
+| ------------------------------------------------ | --- |
+| ![Submissions](docs/screenshots/submissions.png) |     |
 
 ---
 
 ## Key Features & Capabilities
 
 ### Administrative Excellence
-- **Student Management**: Complete lifecycle from admission to graduation
-- **Teacher Portal**: Class management, grading, and communication tools
-- **Parent Engagement**: Real-time access to child's progress and activities
-- **Financial Management**: Fee tracking, payments, and automated invoicing
-- **Academic Planning**: Timetable scheduling, exam management, and resource allocation
+
+- **Student Management**: Student records, admissions data, profiles, and lifecycle tracking
+- **Teacher Portal**: Teacher records, class assignments, attendance, grading, and communication tools
+- **Parent Engagement**: Parent access to student progress, attendance, fees, and school notifications
+- **Financial Management**: Fee tracking, payments, invoicing workflows, and idempotent payment handling
+- **Academic Planning**: Classes, subjects, timetables, exams, results, and academic reporting
 
 ### Advanced Functionality
-- **AI-Powered Grading**: Optional AI assistance for essay evaluation (OpenAI integration)
-- **PDF Report Generation**: Professional reports for attendance, results, and analytics
-- **Real-Time Notifications**: SignalR-powered instant messaging system
-- **Audit Logging**: Complete audit trail for compliance and security
-- **Mobile-Responsive**: Works seamlessly on all devices
 
-### Enterprise Security
-- **Multi-Factor Authentication**: JWT with refresh token rotation
-- **Rate Limiting**: Protection against brute force attacks
-- **Input Sanitization**: XSS and injection prevention
-- **Security Headers**: OWASP-compliant security controls
-- **Role-Based Access Control**: Granular permissions for all user types
+- **AI-Powered Grading**: Optional OpenAI-assisted essay evaluation where configured
+- **PDF Report Generation**: QuestPDF-based reports for academic and operational data
+- **Real-Time Notifications**: SignalR integration for live user notifications
+- **Audit Logging**: Activity tracking for security and operational visibility
+- **Responsive Interface**: Next.js and Tailwind CSS frontend designed for desktop and mobile use
+
+### Security Features
+
+- **JWT Authentication**: Access tokens with refresh token rotation
+- **Role-Based Access Control**: Admin, Teacher, Student, and Parent authorization boundaries
+- **Input Validation**: FluentValidation and request validation across backend workflows
+- **Rate Limiting**: Protection against brute force and abusive request patterns
+- **Security Headers**: OWASP-aligned HTTP security header configuration
+- **File Upload Safety**: Security checks for upload workflows
 
 ---
 
 ## Technology Stack
 
-| Layer | Technology | Why We Chose It |
-|---|---|---|
-| **Backend** | ASP.NET Core 9 | Enterprise performance, security, and scalability |
-| **Frontend** | Next.js 15 | Modern React-based UI with excellent performance |
-| **Database** | PostgreSQL 16 | Reliable, scalable, and feature-rich |
-| **Authentication** | JWT + Refresh Tokens | Secure, stateless authentication |
-| **Validation** | FluentValidation | Comprehensive input validation |
-| **Logging** | Serilog | Structured logging for production monitoring |
-| **PDF Generation** | QuestPDF | High-quality report generation |
-| **Real-Time** | SignalR | Live notifications and updates |
+| Layer                | Technology                                  | Purpose                                       |
+| -------------------- | ------------------------------------------- | --------------------------------------------- |
+| **Backend**          | ASP.NET Core 9 Web API                      | API layer, authentication, business workflows |
+| **Frontend**         | Next.js 15, React, TypeScript, Tailwind CSS | Role-based web application                    |
+| **Database**         | PostgreSQL 16                               | Relational data storage                       |
+| **ORM**              | Entity Framework Core                       | Migrations, queries, persistence model        |
+| **Authentication**   | JWT + Refresh Tokens                        | Secure stateless authentication               |
+| **Validation**       | FluentValidation                            | Request and command validation                |
+| **Logging**          | Serilog                                     | Structured application logging                |
+| **PDF Generation**   | QuestPDF                                    | Report rendering                              |
+| **Real-Time**        | SignalR                                     | Live notifications                            |
+| **Backend Testing**  | xUnit, Testcontainers                       | Integration and production-readiness testing  |
+| **Frontend Testing** | Vitest, React Testing Library               | Component and UI behavior testing             |
+| **Deployment**       | Docker Compose                              | Local and server deployment foundation        |
+
+---
+
+## Portfolio Highlights
+
+- **Clean Architecture** with separated API, Application, Domain, Infrastructure, and Persistence layers
+- **RBAC authorization** across Admin, Teacher, Student, and Parent workflows
+- **JWT authentication** with refresh token support
+- **PostgreSQL schema and EF Core migrations** for relational data integrity
+- **SignalR realtime notifications** for live application updates
+- **Payment idempotency** to prevent duplicate payment records during retries
+- **PDF reports** generated with QuestPDF
+- **Docker Compose deployment** for repeatable environment setup
+- **Automated tests** covering backend, frontend, security, realtime, and database behavior
+- **Professional documentation** for API contracts, backend architecture, frontend architecture, and deployment
 
 ---
 
 ## Quick Start - Deploy in Minutes
 
-### Docker Deployment (Recommended)
+### Docker Deployment
 
 ```bash
 # 1. Clone and configure
@@ -76,21 +163,22 @@ git clone <repository-url>
 cd school-management-system
 cp .env.example .env
 
-# 2. Configure essential settings
-# Edit .env and set:
-# - JWT_SECRET_KEY (generate a strong 64-character key)
-# - POSTGRES_PASSWORD (secure database password)
-# - FRONTEND_ORIGIN (your deployment URL)
-# - DATABASE_AUTO_MIGRATE=false and DATABASE_SEED_DEMO_DATA=false for production
+# 2. Configure essential settings in .env
+# - JWT_SECRET_KEY: strong random secret, at least 32 characters
+# - POSTGRES_PASSWORD: secure database password
+# - FRONTEND_ORIGIN: frontend URL
+# - DATABASE_AUTO_MIGRATE=false for production
+# - DATABASE_SEED_DEMO_DATA=false for production
 
-# 3. Deploy with single command
+# 3. Start the application
 docker compose up --build -d
 
-# 4. Access your system
+# 4. Access the system
 # Frontend: http://localhost:3000
 # API: http://localhost:5000
-# Demo admin is available only when DATABASE_SEED_DEMO_DATA=true in a non-production environment.
 ```
+
+Demo data is created only when `DATABASE_SEED_DEMO_DATA=true` in a non-production environment.
 
 ### Manual Development Setup
 
@@ -110,49 +198,55 @@ npm install
 npm run dev
 ```
 
-| Service | URL |
-|---|---|
-| Frontend | http://localhost:3000 |
-| API | http://localhost:5000 |
-| Health check | http://localhost:5000/health |
-| Swagger UI | http://localhost:5000/swagger *(Development only)* |
-| PostgreSQL | localhost:5432 |
+| Service      | URL                                                |
+| ------------ | -------------------------------------------------- |
+| Frontend     | http://localhost:3000                              |
+| API          | http://localhost:5000                              |
+| Health check | http://localhost:5000/health                       |
+| Swagger UI   | http://localhost:5000/swagger _(Development only)_ |
+| PostgreSQL   | localhost:5432                                     |
 
 ---
 
 ## System Architecture
 
 ### Clean Architecture Pattern
-```
+
+```text
 School Management System
 |
-|-- Presentation Layer (API Controllers)
-|-- Application Layer (Services, DTOs, Validators)
-|-- Domain Layer (Entities, Business Logic)
-|-- Infrastructure Layer (Database, External Services)
+|-- Presentation Layer      ASP.NET Core controllers, middleware, SignalR hubs
+|-- Application Layer       DTOs, service interfaces, validators, use-case logic
+|-- Domain Layer            Entities, enums, core business rules
+|-- Infrastructure Layer    JWT, hashing, PDF generation, external integrations
+|-- Persistence Layer       EF Core DbContext, migrations, seed data
+|-- Frontend Layer          Next.js App Router, React components, feature modules
 ```
 
 ### Database Schema
-- **Users & Roles**: Multi-role authentication system
-- **Academic Structure**: Classes, subjects, timetables
-- **Student Records**: Attendance, grades, assessments
-- **Financial System**: Fees, payments, invoicing
-- **Communication**: Notifications, messages, alerts
+
+- **Users & Roles**: Multi-role authentication and authorization model
+- **Academic Structure**: Classes, subjects, timetables, exams, results
+- **Student Records**: Profiles, attendance, grades, submissions
+- **Financial System**: Fees, payments, invoices, idempotency keys
+- **Communication**: Notifications, messages, realtime events
+- **Audit & Security**: Activity logs and security-relevant records
 
 ### Project Structure
+
 ```text
 .
 |-- src/
-|   |-- SchoolManagement.API/            Controllers, middleware, Program.cs
+|   |-- SchoolManagement.API/            Controllers, middleware, hubs, Program.cs
 |   |-- SchoolManagement.Application/    DTOs, service interfaces, validators
-|   |-- SchoolManagement.Domain/         Entities, enums
-|   |-- SchoolManagement.Infrastructure/ JWT, hashing, PDF, DI
-|   `-- SchoolManagement.Persistence/    EF Core, migrations, seed
+|   |-- SchoolManagement.Domain/         Entities, enums, domain model
+|   |-- SchoolManagement.Infrastructure/ JWT, hashing, PDF, dependency injection
+|   `-- SchoolManagement.Persistence/    EF Core, migrations, seed data
 |-- tests/
-|   `-- SchoolManagement.Tests/          Integration tests
-|-- frontend/                            Next.js 15 App Router
+|   `-- SchoolManagement.Tests/          xUnit integration tests
+|-- frontend/                            Next.js 15 App Router application
 |-- database/                            Reference SQL schema
-|-- docs/                                Additional documentation
+|-- docs/                                Additional documentation and screenshots
 |-- docker-compose.yml
 `-- .env.example
 ```
@@ -162,99 +256,100 @@ School Management System
 ## User Roles & Capabilities
 
 ### Administrator
-- Complete system management
-- User account creation and management
-- Academic structure setup
-- Financial oversight
-- System configuration and security
+
+- Manage users, roles, students, teachers, and parents
+- Configure classes, subjects, exams, timetables, and fees
+- Review payments, reports, notifications, and audit data
+- Maintain system-level operational settings
 
 ### Teacher
-- Class management and scheduling
-- Student attendance tracking
-- Grade management and reporting
-- Parent communication
-- Resource assignment
+
+- Manage class attendance and academic records
+- Create and review exams, results, and submissions
+- Communicate with students and parents
+- Track class-level progress and activity
 
 ### Student
-- Personal dashboard and progress tracking
-- Timetable and assignment access
-- Grade viewing and feedback
-- Communication with teachers
-- Profile management
+
+- View dashboard, timetable, attendance, results, and submissions
+- Track academic progress and school notifications
+- Access personal profile and learning information
 
 ### Parent
-- Child's academic progress monitoring
-- Attendance and behavior tracking
-- Fee payment and management
-- Teacher communication
-- School notifications
+
+- Monitor child attendance, results, fees, and notifications
+- Review academic progress and school communication
+- Stay informed about operational and financial updates
 
 ---
 
 ## Security & Compliance
 
-### Enterprise Security Features
-- **Authentication**: JWT with secure refresh token rotation
-- **Authorization**: Role-based access control (RBAC)
-- **Input Validation**: Comprehensive sanitization and validation
-- **Payment Idempotency**: Stable `idempotencyKey` support prevents duplicate payment rows during retries
-- **Rate Limiting**: Protection against abuse and attacks
-- **Audit Logging**: Complete activity tracking
-- **Security Headers**: OWASP-compliant headers
+### Security Features
 
-### Compliance Ready
-- **GDPR Compliant**: Data protection and privacy features
-- **Audit Trail**: Complete logging for compliance requirements
-- **Data Retention**: Configurable data retention policies
-- **Secure Communication**: HTTPS enforcement and secure headers
+- **Authentication**: JWT access tokens with refresh token rotation
+- **Authorization**: Role-based access control for all major workflows
+- **Input Validation**: Backend validation and malicious-input smoke coverage
+- **Payment Idempotency**: Stable `idempotencyKey` support prevents duplicate payment rows during retries
+- **Rate Limiting**: Protection against abusive request patterns
+- **Audit Logging**: Activity tracking for operational and security visibility
+- **Security Headers**: Hardened HTTP headers for browser-facing protection
+- **File Upload Security**: Tests and validation around upload behavior
+
+### Compliance-Oriented Foundations
+
+- **Audit Trail**: Logging designed to support accountability and review
+- **Data Protection**: Authentication, authorization, and validation controls
+- **Configurable Deployment**: Environment-based configuration for production hardening
+- **Secure Communication Ready**: Designed to run behind HTTPS in production
 
 ---
 
 ## Performance & Scalability
 
-### Optimized for Production
-- **Database Performance**: Indexed queries and optimized schemas
-- **Caching Strategy**: Intelligent caching for frequently accessed data
-- **Load Balancing Ready**: Stateless design for horizontal scaling
-- **Monitoring**: Health checks and performance metrics
-- **Resource Management**: Efficient memory and CPU usage
+### Optimized for Production-Oriented Use
 
-### Scalability Features
-- **Microservice Ready**: Clean architecture for service separation
-- **Database Scaling**: PostgreSQL replication and partitioning support
-- **Frontend Optimization**: Code splitting and lazy loading
-- **CDN Compatible**: Static asset optimization
+- **Database Performance**: Indexed queries and relational schema design
+- **Stateless API Design**: Suitable for horizontal scaling behind a load balancer
+- **Frontend Optimization**: Next.js build pipeline, code splitting, and typed UI modules
+- **Health Checks**: API health endpoint for deployment monitoring
+- **Structured Logging**: Serilog output suitable for centralized logging systems
+
+### Scalability Foundations
+
+- **Containerized Services**: Docker Compose foundation for repeatable deployments
+- **PostgreSQL Compatibility**: Tested against the real Npgsql provider using Testcontainers
+- **Separation of Concerns**: Clean Architecture supports future modularization
+- **CDN Compatible Frontend Assets**: Next.js static asset handling supports common hosting patterns
 
 ---
 
 ## Deployment Options
 
 ### Cloud Deployment
-- **AWS Ready**: ECS, RDS, and ALB configurations
-- **Azure Compatible**: Container Instances and Azure Database
-- **Google Cloud**: Cloud Run and Cloud SQL support
-- **DigitalOcean**: App Platform and Managed Databases
+
+- **AWS**: ECS, RDS, ALB, or similar container-based hosting
+- **Azure**: App Service, Container Apps, Azure Database for PostgreSQL
+- **Google Cloud**: Cloud Run and Cloud SQL
+- **DigitalOcean**: App Platform, Droplets, and Managed PostgreSQL
 
 ### On-Premise Deployment
-- **Docker Compose**: Simple single-server deployment
-- **Kubernetes**: Production orchestration support
-- **Windows Server**: IIS deployment options
-- **Linux Support**: Ubuntu, CentOS, and other distributions
+
+- **Docker Compose**: Single-server deployment foundation
+- **Linux Servers**: Suitable for Ubuntu and similar server distributions
+- **Windows Server**: Can be adapted for IIS or container-based hosting
+- **Reverse Proxy Ready**: Intended to run behind Nginx, Caddy, Traefik, IIS, or a cloud load balancer
 
 ---
 
-## Demo & Evaluation
+## Production Readiness
 
-### Demo Credentials
-When `DATABASE_SEED_DEMO_DATA=true` in a non-production environment, the following admin account is created automatically:
+This project has a production-ready architecture and a deployment-ready foundation. It is suitable for professional portfolio review and university/project presentation because it includes real authentication, authorization, database migrations, automated tests, Docker deployment, security checks, and documented configuration.
 
-```text
-Email:    admin@school.com
-Password: Admin@12345
-Role:     Admin
-```
+Actual production deployment still requires environment-specific hardening, including proper secrets management, HTTPS reverse proxy configuration, persistent Data Protection keys, database backups, monitoring, log aggregation, email/provider configuration, and secure infrastructure settings.
 
 ### Production Checklist
+
 - [ ] Set a strong random `JWT_SECRET_KEY` with at least 32 characters
 - [ ] Change `POSTGRES_USER` and `POSTGRES_PASSWORD`
 - [ ] Set `FRONTEND_ORIGIN` and `FRONTEND_ORIGIN_ALT` to deployed frontend URLs
@@ -262,9 +357,11 @@ Role:     Admin
 - [ ] Set `DATABASE_AUTO_MIGRATE=false` in production
 - [ ] Set `DATABASE_SEED_DEMO_DATA=false` in production
 - [ ] Keep `DATABASE_ALLOW_PRODUCTION_AUTO_MIGRATE=false` unless running a deliberate one-off migration window
-- [ ] Configure Data Protection key ring persistence for your hosting platform
+- [ ] Configure persistent ASP.NET Core Data Protection keys
+- [ ] Place the API and frontend behind HTTPS
+- [ ] Configure backups, monitoring, alerting, and log retention
 
-### Production configuration safety
+### Production Configuration Safety
 
 The API fails fast when `ASPNETCORE_ENVIRONMENT=Production` and unsafe settings are present:
 
@@ -276,56 +373,90 @@ The default `docker-compose.yml` is development-oriented and requires `JWT_SECRE
 
 ---
 
+## Demo & Evaluation
+
+### Demo Credentials
+
+When `DATABASE_SEED_DEMO_DATA=true` in a non-production environment, the following admin account is created automatically:
+
+```text
+Email:    admin@school.com
+Password: Admin@12345
+Role:     Admin
+```
+
+---
+
 ## Target Customers
 
 ### Educational Institutions
-- **K-12 Schools**: Complete administration and parent engagement
-- **Colleges & Universities**: Advanced academic management and reporting
-- **Training Centers**: Flexible course management and certification
-- **Language Schools**: Student progress tracking and communication
+
+- **K-12 Schools**: Administration, attendance, grading, fees, and parent engagement
+- **Colleges & Universities**: Academic records, reporting, and role-based workflows
+- **Training Centers**: Course-style management, progress tracking, and communication
+- **Language Schools**: Student progress, attendance, payments, and reports
 
 ### Service Providers
-- **Educational Consultants**: White-label solution for client schools
-- **IT Service Companies**: Customizable platform for educational clients
-- **Government Agencies**: Public education system management
-- **Non-Profit Organizations**: Affordable solution for community education
+
+- **Educational Consultants**: Customizable platform foundation for client institutions
+- **IT Service Companies**: Source-available base for education-sector projects
+- **Government or Non-Profit Programs**: Adaptable system for structured educational administration
+- **Student Developers**: Strong reference project for full-stack architecture and testing practices
 
 ---
 
 ## Why Choose This System?
 
 ### For Educational Institutions
-- **Complete Solution**: Everything you need in one platform
-- **Easy Implementation**: Deploy in minutes, not months
-- **Cost Effective**: No recurring licensing fees
-- **Future-Proof**: Modern technology stack and architecture
+
+- **Complete Workflow Coverage**: Core school administration features in one application
+- **Role-Specific Portals**: Clear separation of Admin, Teacher, Student, and Parent responsibilities
+- **Deployment-Ready Foundation**: Docker Compose setup and environment-based configuration
+- **Security-Aware Design**: Authentication, authorization, validation, rate limiting, and audit logging
 
 ### For Developers & Agencies
-- **Clean Code**: Well-structured, maintainable codebase
-- **Extensible**: Easy to customize and extend
-- **Modern Stack**: Latest technologies and best practices
-- **Production Ready**: Enterprise-grade security and performance
+
+- **Clean Codebase Structure**: Layered architecture with clear project boundaries
+- **Extensible Foundation**: Designed for additional modules and institution-specific customization
+- **Modern Stack**: ASP.NET Core 9, Next.js 15, TypeScript, PostgreSQL, and Docker
+- **Professionally Tested**: Backend, frontend, database, security, realtime, and validation coverage
 
 ### Competitive Advantages
-- **All-in-One**: No need for multiple systems
-- **Real-Time**: Live updates and notifications
-- **Mobile-Friendly**: Works on all devices
-- **AI Integration**: Optional AI-powered features
-- **Audit Ready**: Complete compliance and audit trails
+
+- **All-in-One Academic Operations**: Users, academics, finance, reporting, and notifications
+- **Realtime Capability**: SignalR-based live notifications
+- **Mobile-Friendly Frontend**: Responsive Next.js interface
+- **Optional AI Integration**: Configurable OpenAI-assisted grading workflow
+- **Audit-Ready Foundation**: Activity tracking and security-conscious backend design
 
 ---
 
-## Support & Documentation
+## Testing & Quality Assurance
 
-### Documentation
-- **[API Documentation](API_CONTRACT.md)**: Complete API reference
-- **[Deployment Guide](DEPLOYMENT.md)**: Production deployment instructions
-- **[Backend Architecture](BACKEND.md)**: Technical implementation details
-- **[Frontend Guide](FRONTEND.md)**: Frontend architecture and customization
+The project includes automated backend and frontend test coverage for core application behavior, security boundaries, database behavior, realtime notifications, and UI workflows.
 
-### Quality Assurance
+### Backend Quality
+
+- **xUnit integration tests** for API behavior and application workflows
+- **PostgreSQL Testcontainers** coverage against the real PostgreSQL/Npgsql provider
+- **Security tests** for authentication, authorization, CORS, rate limiting, security headers, and malicious input smoke cases
+- **SignalR integration tests** for realtime notification behavior
+- **File upload security tests** for upload validation and hardening
+- **Pagination validation tests** for request boundary handling
+- **Payment idempotency tests** for retry and concurrency behavior
+- **Startup configuration safety tests** for production misconfiguration detection
+
+### Frontend Quality
+
+- **Vitest tests** for frontend logic and feature behavior
+- **React Testing Library** tests for component rendering and user interactions
+- **Lint clean result** with `0 errors` and `0 warnings`
+- **Production build succeeded** through the Next.js build pipeline
+
+### Quality Commands
+
 ```bash
-# Backend tests
+# Backend build and tests
 dotnet build SchoolManagement.sln -v minimal
 dotnet test tests/SchoolManagement.Tests/SchoolManagement.Tests.csproj -v minimal
 
@@ -339,45 +470,83 @@ dotnet test tests/SchoolManagement.Tests/SchoolManagement.Tests.csproj --filter 
 # Requires Docker Desktop or a reachable Docker daemon.
 dotnet test tests/SchoolManagement.Tests/SchoolManagement.Tests.csproj --filter Category=PostgreSQL
 
-# Frontend tests
+# Frontend tests and build
 cd frontend
 npm run lint
 npm test
 npm run build
 ```
 
-The default SQLite-backed backend tests remain the fast API regression suite. The PostgreSQL Testcontainers suite runs selected production-readiness checks against the real Npgsql provider, including EF Core migrations, schema/index integrity, PostgreSQL constraints, and payment idempotency under retry/concurrency. Security integration tests cover JWT bearer rejection/acceptance, RBAC boundaries, CORS preflight behavior, rate limiting, security headers, and malicious-input smoke cases.
+The default SQLite-backed backend tests provide fast API regression coverage. The PostgreSQL Testcontainers suite verifies EF Core migrations, schema/index integrity, PostgreSQL constraints, and payment idempotency under retry/concurrency conditions.
+
+---
+
+## Support & Documentation
+
+### Documentation
+
+- **[API Documentation](API_CONTRACT.md)**: API reference and request/response contracts
+- **[Deployment Guide](DEPLOYMENT.md)**: Deployment instructions and operational notes
+- **[Backend Architecture](BACKEND.md)**: Backend implementation and architectural overview
+- **[Frontend Guide](FRONTEND.md)**: Frontend structure and customization guidance
+- **[Database Structure](DATABASE_STRUCTURE.md)**: Database schema reference
+- **[Production Deployment](DEPLOYMENT_PRODUCTION.md)**: Production-oriented deployment details
 
 ---
 
 ## License & Pricing
 
 ### MIT License
-- **Commercial Use**: Unlimited commercial applications
-- **Modification**: Full source code modification rights
-- **Distribution**: Redistribution allowed
-- **Private Use**: No restrictions on private use
+
+- **Commercial Use**: Allowed
+- **Modification**: Allowed
+- **Distribution**: Allowed
+- **Private Use**: Allowed
 - **Warranty**: Software provided "as is" without warranty
 
 ### Value Proposition
-- **Zero Licensing Costs**: No per-user or per-school fees
-- **Complete Source Code**: Full ownership and customization
-- **No Vendor Lock-in**: Deploy anywhere, modify anything
-- **Community Support**: Active development and improvement
+
+- **Zero Licensing Costs**: No per-user or per-school license fees
+- **Complete Source Code**: Full ownership and customization rights under the MIT license
+- **No Vendor Lock-In**: Deploy, modify, and extend the system independently
+- **Strong Learning Value**: Demonstrates full-stack architecture, security, testing, and deployment practices
 
 ---
 
-## Start Transforming Your School Today
+## Start Evaluating the Project
 
-**Ready to modernize your educational institution?**
-
-1. **Deploy Now**: Get started with our Docker setup in minutes
-2. **Customize**: Tailor the system to your specific needs
-3. **Scale**: Grow from single classroom to entire district
-4. **Integrate**: Connect with your existing systems and workflows
-
-**Join thousands of educational institutions already using our platform to deliver better education experiences.**
+1. **Run with Docker**: Start the full stack using `docker compose up --build -d`
+2. **Review the UI**: Sign in with seeded demo credentials in a non-production environment
+3. **Inspect the API**: Use Swagger in development or review `API_CONTRACT.md`
+4. **Run the Tests**: Validate backend, frontend, database, security, and realtime behavior
+5. **Customize Safely**: Extend features through the existing Clean Architecture boundaries
 
 ---
 
-*Built with passion for education, powered by modern technology.*
+## Expected Screenshot Files
+
+The README references the following files:
+
+```text
+docs/screenshots/login.png
+docs/screenshots/admin-dashboard.png
+docs/screenshots/students.png
+docs/screenshots/teachers.png
+docs/screenshots/parents.png
+docs/screenshots/classes.png
+docs/screenshots/subjects.png
+docs/screenshots/timetable.png
+docs/screenshots/attendance-register.png
+docs/screenshots/attendance-history.png
+docs/screenshots/exams.png
+docs/screenshots/results.png
+docs/screenshots/fees.png
+docs/screenshots/payments.png
+docs/screenshots/reports.png
+docs/screenshots/notifications.png
+docs/screenshots/submissions.png
+```
+
+---
+
+_Built as a production-oriented, professionally tested school management platform for portfolio, academic, and deployment evaluation._
