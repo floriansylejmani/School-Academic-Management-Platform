@@ -286,6 +286,11 @@ public static class DataSeeder
             .Where(x => codes.Contains(x.TeacherCode))
             .ToDictionaryAsync(x => x.TeacherCode, StringComparer.OrdinalIgnoreCase, cancellationToken);
 
+        var teachersByEmail = await context.Teachers
+            .Include(x => x.User)
+            .Where(x => x.User != null && emails.Contains(x.User.Email))
+            .ToDictionaryAsync(x => x.User!.Email, StringComparer.OrdinalIgnoreCase, cancellationToken);
+
         foreach (var (seed, index) in TeacherSeeds.Select((seed, index) => (seed, index)))
         {
             if (!usersByEmail.TryGetValue(seed.Email, out var user))
@@ -306,6 +311,12 @@ public static class DataSeeder
                 usersByEmail[seed.Email] = user;
             }
 
+            if (teachersByEmail.TryGetValue(seed.Email, out var existingTeacher))
+            {
+                teachersByCode[seed.Code] = existingTeacher;
+                continue;
+            }
+
             if (teachersByCode.ContainsKey(seed.Code))
             {
                 continue;
@@ -322,6 +333,7 @@ public static class DataSeeder
             context.Teachers.Add(teacher);
             await context.SaveChangesAsync(cancellationToken);
             teachersByCode[seed.Code] = teacher;
+            teachersByEmail[seed.Email] = teacher;
         }
 
         return teachersByCode;
@@ -478,6 +490,11 @@ public static class DataSeeder
             .Where(x => codes.Contains(x.StudentCode))
             .ToDictionaryAsync(x => x.StudentCode, StringComparer.OrdinalIgnoreCase, cancellationToken);
 
+        var studentsByEmail = await context.Students
+            .Include(x => x.User)
+            .Where(x => x.User != null && emails.Contains(x.User.Email))
+            .ToDictionaryAsync(x => x.User!.Email, StringComparer.OrdinalIgnoreCase, cancellationToken);
+
         foreach (var (seed, index) in StudentSeeds.Select((seed, index) => (seed, index)))
         {
             if (!usersByEmail.TryGetValue(seed.Email, out var user))
@@ -496,6 +513,12 @@ public static class DataSeeder
                 context.Users.Add(user);
                 await context.SaveChangesAsync(cancellationToken);
                 usersByEmail[seed.Email] = user;
+            }
+
+            if (studentsByEmail.TryGetValue(seed.Email, out var existingStudent))
+            {
+                studentsByCode[seed.Code] = existingStudent;
+                continue;
             }
 
             if (studentsByCode.ContainsKey(seed.Code))
@@ -517,6 +540,7 @@ public static class DataSeeder
             context.Students.Add(student);
             await context.SaveChangesAsync(cancellationToken);
             studentsByCode[seed.Code] = student;
+            studentsByEmail[seed.Email] = student;
         }
 
         return studentsByCode;

@@ -185,7 +185,13 @@ vi.mock("lucide-react", () => ({
   ReceiptText: () => <span />,
   RefreshCw: () => <span />,
   School: () => <span />,
-  Users: () => <span />
+  Users: () => <span />,
+  UserPlus: () => <span />,
+  MessageSquare: () => <span />,
+  FileText: () => <span />,
+  Plus: () => <span />,
+  ChevronDown: () => <span />,
+  TrendingUp: () => <span />
 }));
 
 describe("AdminDashboardClient", () => {
@@ -276,11 +282,11 @@ describe("AdminDashboardClient", () => {
     };
   });
 
-  it("renders the analytics dashboard header and KPI cards", () => {
+  it("renders the Good afternoon, Admin ?? header and KPI cards", () => {
     render(<AdminDashboardClient />);
 
-    expect(screen.getByTestId("page-title")).toHaveTextContent("Analytics dashboard");
-    expect(screen.getByText("Total students")).toBeInTheDocument();
+    expect(screen.getByTestId("page-title")).toHaveTextContent("Good afternoon, Admin");
+    expect(screen.getByText("Total Students")).toBeInTheDocument();
     expect(screen.getByText("420")).toBeInTheDocument();
     expect(screen.getAllByText("$128,500")).toHaveLength(2);
   });
@@ -288,7 +294,7 @@ describe("AdminDashboardClient", () => {
   it("renders analytics chart sections with current query data", () => {
     render(<AdminDashboardClient />);
 
-    expect(screen.getByText("Attendance trend")).toBeInTheDocument();
+    expect(screen.getByText("Key Performance Indicators")).toBeInTheDocument();
     expect(screen.getByTestId("attendance-chart")).toHaveTextContent("1 attendance points");
     expect(screen.getByTestId("exam-chart")).toHaveTextContent("1 exam averages");
     expect(screen.getByTestId("finance-chart")).toHaveTextContent("159500");
@@ -312,14 +318,14 @@ describe("AdminDashboardClient", () => {
     render(<AdminDashboardClient />);
 
     expect(screen.getByTestId("empty-state")).toBeInTheDocument();
-    expect(screen.getByTestId("empty-title")).toHaveTextContent("Unable to load analytics");
+    expect(screen.getByTestId("empty-title")).toHaveTextContent("Unable to load dashboard data");
   });
 
   it("refetches every analytics query when Retry is clicked from the error state", () => {
     kpisState = { ...kpisState, isError: true };
 
     render(<AdminDashboardClient />);
-    fireEvent.click(screen.getByText("Retry"));
+    fireEvent.click(screen.getByText("Retry Loading"));
 
     expect(mockKpisRefetch).toHaveBeenCalledTimes(1);
     expect(mockTrendRefetch).toHaveBeenCalledTimes(1);

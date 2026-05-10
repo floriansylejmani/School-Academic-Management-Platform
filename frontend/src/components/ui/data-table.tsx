@@ -20,6 +20,25 @@ interface SortState {
   direction: SortDirection;
 }
 
+type SortableValue = string | number | Date | boolean | null | undefined;
+
+function getColumnValue<T>(row: T, key: string): SortableValue {
+  const value = (row as Record<string, unknown>)[key];
+
+  if (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean" ||
+    value instanceof Date ||
+    value === null ||
+    value === undefined
+  ) {
+    return value;
+  }
+
+  return String(value);
+}
+
 export function DataTable<T>({
   columns,
   rows,
@@ -61,7 +80,10 @@ export function DataTable<T>({
       if (aValue === null || aValue === undefined) return 1;
       if (bValue === null || bValue === undefined) return -1;
 
-      const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      const normalizedA = aValue instanceof Date ? aValue.getTime() : aValue;
+      const normalizedB = bValue instanceof Date ? bValue.getTime() : bValue;
+
+      const comparison = normalizedA < normalizedB ? -1 : normalizedA > normalizedB ? 1 : 0;
       return sort.direction === "asc" ? comparison : -comparison;
     });
   }, [rows, sort]);
@@ -77,27 +99,25 @@ export function DataTable<T>({
   const showPagination = rows.length > pageSize;
 
   const handleSort = (columnKey: string) => {
-    const column = columns.find(col => col.key === columnKey);
+    const column = columns.find((col) => col.key === columnKey);
     if (!column?.sortable) return;
 
-    setSort(current => {
+    setSort((current) => {
       if (current.key !== columnKey) {
         return { key: columnKey, direction: "asc" };
       }
+
       if (current.direction === "asc") {
         return { key: columnKey, direction: "desc" };
       }
+
       return { key: columnKey, direction: null };
     });
   };
 
-  const getColumnValue = (row: T, key: string): any => {
-    // This is a simplified approach - in a real app, you might want to pass a getter function
-    return (row as any)[key];
-  };
-
   const getSortIcon = (columnKey: string) => {
     if (sort.key !== columnKey || !sort.direction) return null;
+
     return sort.direction === "asc" ? (
       <ChevronUp className="h-3.5 w-3.5" />
     ) : (
@@ -123,16 +143,19 @@ export function DataTable<T>({
                   style={{ width: column.width }}
                   onClick={() => column.sortable && handleSort(column.key)}
                 >
-                  <div className={cn(
-                    "flex items-center gap-1",
-                    column.align === "center" && "justify-center",
-                    column.align === "right" && "justify-end"
-                  )}>
+                  <div
+                    className={cn(
+                      "flex items-center gap-1",
+                      column.align === "center" && "justify-center",
+                      column.align === "right" && "justify-end"
+                    )}
+                  >
                     {column.header}
                     {getSortIcon(column.key)}
                   </div>
                 </th>
               ))}
+
               {hasActions ? (
                 <th className="px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
                   Actions
@@ -140,6 +163,7 @@ export function DataTable<T>({
               ) : null}
             </tr>
           </thead>
+
           <tbody className="divide-y divide-slate-200 bg-white">
             {pagedRows.map((row, index) => (
               <tr
@@ -152,8 +176,8 @@ export function DataTable<T>({
                 )}
               >
                 {columns.map((column) => (
-                  <td 
-                    key={column.key} 
+                  <td
+                    key={column.key}
                     className={cn(
                       "px-5 py-3.5 text-sm text-slate-700",
                       column.align === "center" && "text-center",
@@ -163,6 +187,7 @@ export function DataTable<T>({
                     {column.render(row)}
                   </td>
                 ))}
+
                 {hasActions ? (
                   <td className="px-5 py-3.5">
                     <div className="flex items-center justify-end gap-2">
@@ -177,6 +202,7 @@ export function DataTable<T>({
                           Edit
                         </Button>
                       ) : null}
+
                       {onDelete ? (
                         <Button
                           variant="ghost"
@@ -196,6 +222,7 @@ export function DataTable<T>({
           </tbody>
         </table>
       </div>
+
       {showPagination ? (
         <div className="flex items-center justify-between gap-4 border-t border-slate-100 px-5 py-3 text-xs text-slate-500">
           <span className="flex items-center gap-1">
@@ -206,6 +233,7 @@ export function DataTable<T>({
             <span className="font-medium text-slate-700">{rows.length}</span>
             results
           </span>
+
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
@@ -216,9 +244,11 @@ export function DataTable<T>({
             >
               Previous
             </Button>
+
             <span className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-slate-700 bg-slate-100 rounded-lg">
               Page {page} of {totalPages}
             </span>
+
             <Button
               variant="ghost"
               size="sm"

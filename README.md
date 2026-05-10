@@ -81,6 +81,7 @@ cp .env.example .env
 # - JWT_SECRET_KEY (generate a strong 64-character key)
 # - POSTGRES_PASSWORD (secure database password)
 # - FRONTEND_ORIGIN (your deployment URL)
+# - DATABASE_AUTO_MIGRATE=false and DATABASE_SEED_DEMO_DATA=false for production
 
 # 3. Deploy with single command
 docker compose up --build -d
@@ -88,7 +89,7 @@ docker compose up --build -d
 # 4. Access your system
 # Frontend: http://localhost:3000
 # API: http://localhost:5000
-# Admin: admin@school.com / Admin@12345
+# Demo admin is available only when DATABASE_SEED_DEMO_DATA=true in a non-production environment.
 ```
 
 ### Manual Development Setup
@@ -196,6 +197,7 @@ School Management System
 - **Authentication**: JWT with secure refresh token rotation
 - **Authorization**: Role-based access control (RBAC)
 - **Input Validation**: Comprehensive sanitization and validation
+- **Payment Idempotency**: Stable `idempotencyKey` support prevents duplicate payment rows during retries
 - **Rate Limiting**: Protection against abuse and attacks
 - **Audit Logging**: Complete activity tracking
 - **Security Headers**: OWASP-compliant headers
@@ -244,7 +246,7 @@ School Management System
 ## Demo & Evaluation
 
 ### Demo Credentials
-When `DATABASE_SEED_DEMO_DATA=true`, the following admin account is created automatically:
+When `DATABASE_SEED_DEMO_DATA=true` in a non-production environment, the following admin account is created automatically:
 
 ```text
 Email:    admin@school.com
@@ -257,9 +259,20 @@ Role:     Admin
 - [ ] Change `POSTGRES_USER` and `POSTGRES_PASSWORD`
 - [ ] Set `FRONTEND_ORIGIN` and `FRONTEND_ORIGIN_ALT` to deployed frontend URLs
 - [ ] Set `PASSWORD_RESET_FRONTEND_URL` to the deployed reset-password page
-- [ ] Set `DATABASE_AUTO_MIGRATE=false` after initial deployment
+- [ ] Set `DATABASE_AUTO_MIGRATE=false` in production
 - [ ] Set `DATABASE_SEED_DEMO_DATA=false` in production
+- [ ] Keep `DATABASE_ALLOW_PRODUCTION_AUTO_MIGRATE=false` unless running a deliberate one-off migration window
 - [ ] Configure Data Protection key ring persistence for your hosting platform
+
+### Production configuration safety
+
+The API fails fast when `ASPNETCORE_ENVIRONMENT=Production` and unsafe settings are present:
+
+- demo or development JWT secrets are rejected
+- `DATABASE_SEED_DEMO_DATA=true` is rejected
+- `DATABASE_AUTO_MIGRATE=true` is rejected unless `DATABASE_ALLOW_PRODUCTION_AUTO_MIGRATE=true` is explicitly set
+
+The default `docker-compose.yml` is development-oriented and requires `JWT_SECRET_KEY` to be provided instead of falling back to a demo secret. For production, use `.env.production.example` as the starting point and replace all `CHANGE_ME` values before deployment.
 
 ---
 
@@ -316,12 +329,24 @@ Role:     Admin
 dotnet build SchoolManagement.sln -v minimal
 dotnet test tests/SchoolManagement.Tests/SchoolManagement.Tests.csproj -v minimal
 
+# Fast backend suite without PostgreSQL Testcontainers
+dotnet test tests/SchoolManagement.Tests/SchoolManagement.Tests.csproj --filter "Category!=PostgreSQL"
+
+# Security integration tests
+dotnet test tests/SchoolManagement.Tests/SchoolManagement.Tests.csproj --filter Security
+
+# PostgreSQL-backed integration tests
+# Requires Docker Desktop or a reachable Docker daemon.
+dotnet test tests/SchoolManagement.Tests/SchoolManagement.Tests.csproj --filter Category=PostgreSQL
+
 # Frontend tests
 cd frontend
 npm run lint
 npm test
 npm run build
 ```
+
+The default SQLite-backed backend tests remain the fast API regression suite. The PostgreSQL Testcontainers suite runs selected production-readiness checks against the real Npgsql provider, including EF Core migrations, schema/index integrity, PostgreSQL constraints, and payment idempotency under retry/concurrency. Security integration tests cover JWT bearer rejection/acceptance, RBAC boundaries, CORS preflight behavior, rate limiting, security headers, and malicious-input smoke cases.
 
 ---
 

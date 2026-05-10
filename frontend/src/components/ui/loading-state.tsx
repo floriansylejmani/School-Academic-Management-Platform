@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Loader2, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/utils/cn";
 

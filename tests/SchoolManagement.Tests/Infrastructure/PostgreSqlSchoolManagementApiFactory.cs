@@ -1,15 +1,13 @@
 using System.Net.Http.Json;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using SchoolManagement.API.Common;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using SchoolManagement.API.Common;
 using SchoolManagement.Application.AI;
 using SchoolManagement.Application.Authentication;
 using SchoolManagement.Application.Common.Interfaces;
@@ -17,19 +15,24 @@ using SchoolManagement.Application.Common.Models;
 using SchoolManagement.Domain.Entities;
 using SchoolManagement.Infrastructure.Authentication;
 using SchoolManagement.Persistence;
-using SchoolManagement.Persistence.Seed;
+using Testcontainers.PostgreSql;
 
 namespace SchoolManagement.Tests.Infrastructure;
 
-public sealed class SchoolManagementApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
+public sealed class PostgreSqlSchoolManagementApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    public const string AdminEmail = "admin@school.com";
+    public const string AdminEmail = "postgres.admin@school.com";
     public const string AdminPassword = "Admin@12345";
-    private const string JwtIssuer = "SchoolManagement.Tests";
-    private const string JwtAudience = "SchoolManagement.Tests.Client";
-    private const string JwtSecretKey = "SchoolManagementTests_SecretKey_1234567890!";
+    private const string JwtIssuer = "SchoolManagement.PostgreSql.Tests";
+    private const string JwtAudience = "SchoolManagement.PostgreSql.Tests.Client";
+    private const string JwtSecretKey = "SchoolManagementPostgreSqlTests_SecretKey_1234567890!";
 
-    private readonly SqliteConnection _connection = new("Data Source=:memory:");
+    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder("postgres:16")
+        .WithDatabase("school_management_tests")
+        .WithUsername("postgres")
+        .WithPassword("postgres")
+        .Build();
+
     private readonly CapturedPasswordResetNotifier _passwordResetNotifier = new();
     private readonly CapturedAIGradingService _aiGradingService = new();
 
@@ -40,7 +43,7 @@ public sealed class SchoolManagementApiFactory : WebApplicationFactory<Program>,
         {
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["ConnectionStrings:DefaultConnection"] = "Data Source=:memory:",
+                ["ConnectionStrings:DefaultConnection"] = _container.GetConnectionString(),
                 ["Database:AutoMigrate"] = "false",
                 ["Database:SeedDemoData"] = "false",
                 ["AllowedOrigins:0"] = "http://localhost",
@@ -49,30 +52,20 @@ public sealed class SchoolManagementApiFactory : WebApplicationFactory<Program>,
                 ["Jwt:Audience"] = JwtAudience,
                 ["Jwt:SecretKey"] = JwtSecretKey,
                 ["RateLimiting:Enabled"] = "false",
-                ["RateLimiting:AuthLimit"] = "10000",
-                ["RateLimiting:DefaultLimit"] = "10000"
+                ["OpenAI:Enabled"] = "false"
             });
         });
 
         builder.ConfigureServices(services =>
         {
-            services.RemoveAll<AppDbContext>();
-            services.RemoveAll<DbContextOptions<AppDbContext>>();
-            services.RemoveAll<IDbContextOptionsConfiguration<AppDbContext>>();
             services.RemoveAll<IPasswordResetNotifier>();
             services.RemoveAll<IAIGradingService>();
 
-            services.AddDbContext<AppDbContext>(options => options.UseSqlite(_connection));
             services.AddSingleton(_passwordResetNotifier);
             services.AddSingleton<IPasswordResetNotifier>(_passwordResetNotifier);
             services.AddSingleton(_aiGradingService);
             services.AddSingleton<IAIGradingService>(_aiGradingService);
-            services.PostConfigure<RateLimitingOptions>(options =>
-            {
-                options.Enabled = false;
-                options.AuthLimit = 10_000;
-                options.DefaultLimit = 10_000;
-            });
+            services.PostConfigure<RateLimitingOptions>(options => options.Enabled = false);
             services.PostConfigure<JwtSettings>(settings =>
             {
                 settings.Issuer = JwtIssuer;
@@ -90,14 +83,27 @@ public sealed class SchoolManagementApiFactory : WebApplicationFactory<Program>,
 
     public async Task InitializeAsync()
     {
-        await _connection.OpenAsync();
+        try
+        {
+            await _container.StartAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException(
+                "PostgreSQL Testcontainers tests require Docker to be running and reachable. Start Docker Desktop or your Docker daemon, then rerun tests with --filter Category=PostgreSQL.",
+                ex);
+        }
+
+        using var scope = Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await dbContext.Database.MigrateAsync();
         await ResetDatabaseAsync();
     }
 
     public new async Task DisposeAsync()
     {
         await base.DisposeAsync();
-        await _connection.DisposeAsync();
+        await _container.DisposeAsync();
     }
 
     public async Task ResetDatabaseAsync()
@@ -106,24 +112,43 @@ public sealed class SchoolManagementApiFactory : WebApplicationFactory<Program>,
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
 
-        _passwordResetNotifier.Clear();
-        await dbContext.Database.EnsureDeletedAsync();
-        await dbContext.Database.EnsureCreatedAsync();
-        await DataSeeder.SeedAsync(dbContext, passwordHasher, CancellationToken.None);
-    }
+        await dbContext.Database.ExecuteSqlRawAsync("""
+            DO $$
+            DECLARE
+                truncate_statement text;
+            BEGIN
+                SELECT string_agg(format('TRUNCATE TABLE %I.%I RESTART IDENTITY CASCADE', schemaname, tablename), '; ')
+                INTO truncate_statement
+                FROM pg_tables
+                WHERE schemaname = 'public'
+                  AND tablename <> '__EFMigrationsHistory';
 
-    public async Task<ApiResponse<AuthenticatedUserDto>> LoginAsync(HttpClient client, string email, string password)
-    {
-        var response = await client.PostAsJsonAsync("/api/auth/login", new LoginRequest(email, password));
-        response.EnsureSuccessStatusCode();
-        if (TryGetCookieValue(response, AuthCookieNames.CsrfToken, out var csrfToken))
+                IF truncate_statement IS NOT NULL THEN
+                    EXECUTE truncate_statement;
+                END IF;
+            END $$;
+            """);
+
+        var adminRole = new Role { Name = "Admin" };
+        dbContext.Roles.AddRange(
+            adminRole,
+            new Role { Name = "Teacher" },
+            new Role { Name = "Student" },
+            new Role { Name = "Parent" });
+
+        dbContext.Users.Add(new User
         {
-            client.DefaultRequestHeaders.Remove("X-CSRF-Token");
-            client.DefaultRequestHeaders.Add("X-CSRF-Token", csrfToken);
-        }
+            Role = adminRole,
+            FullName = "PostgreSQL Admin",
+            Email = AdminEmail,
+            PasswordHash = passwordHasher.HashPassword(AdminPassword),
+            IsActive = true
+        });
 
-        return await response.ReadRequiredJsonAsync<ApiResponse<AuthenticatedUserDto>>();
+        await dbContext.SaveChangesAsync();
     }
+
+    public IServiceScope CreateDbContextScope() => Services.CreateScope();
 
     public async Task<HttpClient> CreateAuthenticatedClientAsync(string email = AdminEmail, string password = AdminPassword)
     {
@@ -136,41 +161,18 @@ public sealed class SchoolManagementApiFactory : WebApplicationFactory<Program>,
         return client;
     }
 
-    public async Task SeedUserAsync(string roleName, string email, string password, string fullName)
+    private static async Task<ApiResponse<AuthenticatedUserDto>> LoginAsync(HttpClient client, string email, string password)
     {
-        using var scope = Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
-        var role = await dbContext.Roles.SingleAsync(x => x.Name == roleName);
-
-        dbContext.Users.Add(new User
+        var response = await client.PostAsJsonAsync("/api/auth/login", new LoginRequest(email, password));
+        response.EnsureSuccessStatusCode();
+        if (TryGetCookieValue(response, AuthCookieNames.CsrfToken, out var csrfToken))
         {
-            RoleId = role.Id,
-            FullName = fullName,
-            Email = email.ToLowerInvariant(),
-            PasswordHash = passwordHasher.HashPassword(password),
-            IsActive = true
-        });
+            client.DefaultRequestHeaders.Remove("X-CSRF-Token");
+            client.DefaultRequestHeaders.Add("X-CSRF-Token", csrfToken);
+        }
 
-        await dbContext.SaveChangesAsync();
+        return await response.ReadRequiredJsonAsync<ApiResponse<AuthenticatedUserDto>>();
     }
-
-    public async Task ExecuteDbContextAsync(Func<AppDbContext, Task> action)
-    {
-        using var scope = Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await action(dbContext);
-    }
-
-    public async Task<T> ExecuteDbContextAsync<T>(Func<AppDbContext, Task<T>> action)
-    {
-        using var scope = Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        return await action(dbContext);
-    }
-
-    public string GetCapturedResetToken(string email) => _passwordResetNotifier.GetToken(email);
-    public CapturedAIGradingService AIGradingService => _aiGradingService;
 
     private static bool TryGetCookieValue(HttpResponseMessage response, string cookieName, out string cookieValue)
     {

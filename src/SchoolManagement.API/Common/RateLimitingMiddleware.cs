@@ -29,6 +29,12 @@ public sealed class RateLimitingMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
+        if (!_options.Value.Enabled)
+        {
+            await _next(context);
+            return;
+        }
+
         var endpoint = context.GetEndpoint();
         var rateLimitAttribute = endpoint?.Metadata.GetMetadata<RateLimitAttribute>();
 
@@ -128,6 +134,7 @@ public sealed class RateLimitingMiddleware
 
 public sealed class RateLimitingOptions
 {
+    public bool Enabled { get; set; } = true;
     public int DefaultLimit { get; set; } = 100;
     public int DefaultWindowSeconds { get; set; } = 60;
     public int AuthLimit { get; set; } = 5;
@@ -146,4 +153,3 @@ public sealed class RateLimitAttribute : Attribute
         WindowSeconds = windowSeconds;
     }
 }
-

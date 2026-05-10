@@ -26,7 +26,10 @@ public sealed class StudentService : IStudentService
 
     public async Task<PagedResponse<StudentResponse>> GetPagedAsync(PaginationRequest request, CancellationToken cancellationToken)
     {
-        return await BuildStudentQuery().OrderBy(x => x.User!.FullName).ToPagedResponseAsync(request, cancellationToken, x => x.ToResponse());
+        return await BuildStudentQuery()
+            .OrderBy(x => x.User!.FullName)
+            .ThenBy(x => x.Id)
+            .ToPagedResponseAsync(request, cancellationToken, x => x.ToResponse());
     }
 
     public async Task<StudentResponse> GetByIdAsync(Guid id, CancellationToken cancellationToken)
@@ -50,6 +53,7 @@ public sealed class StudentService : IStudentService
         return await BuildStudentQuery()
             .Where(x => x.Parent != null && x.Parent.UserId == parentUserId)
             .OrderBy(x => x.User!.FullName)
+            .ThenBy(x => x.Id)
             .ToPagedResponseAsync(request, cancellationToken, x => x.ToResponse());
     }
 
@@ -59,6 +63,7 @@ public sealed class StudentService : IStudentService
 
         return await _teacherScopeService.ApplyStudentScope(BuildStudentQuery(), teacherId)
             .OrderBy(x => x.User!.FullName)
+            .ThenBy(x => x.Id)
             .ToPagedResponseAsync(request, cancellationToken, x => x.ToResponse());
     }
 

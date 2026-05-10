@@ -132,6 +132,20 @@ public sealed class FeeService : IFeeService
 
     public async Task<PaymentResponse> AddPaymentAsync(CreatePaymentRequest request, CancellationToken cancellationToken)
     {
+        var idempotencyKey = NormalizeOptional(request.IdempotencyKey);
+        var transactionReference = NormalizeOptional(request.TransactionReference);
+        var paymentDate = NormalizeToUtc(request.PaymentDate);
+
+        if (idempotencyKey is not null)
+        {
+            var existingPayment = await FindPaymentByIdempotencyKeyAsync(idempotencyKey, cancellationToken);
+            if (existingPayment is not null)
+            {
+                EnsureIdempotentPaymentMatches(existingPayment, request, paymentDate, transactionReference);
+                return existingPayment.ToResponse();
+            }
+        }
+
         var fee = await _context.Fees.SingleOrDefaultAsync(x => x.Id == request.FeeId, cancellationToken)
             ?? throw new AppException("Fee not found.", 404);
 
@@ -147,9 +161,10 @@ public sealed class FeeService : IFeeService
         {
             FeeId = fee.Id,
             AmountPaid = request.AmountPaid,
-            PaymentDate = request.PaymentDate,
+            PaymentDate = paymentDate,
             PaymentMethod = request.PaymentMethod,
-            TransactionReference = request.TransactionReference?.Trim()
+            TransactionReference = transactionReference,
+            IdempotencyKey = idempotencyKey
         };
 
         _context.Payments.Add(payment);
@@ -188,6 +203,15 @@ public sealed class FeeService : IFeeService
         {
             await _context.SaveChangesAsync(cancellationToken);
         }
+        catch (DbUpdateException) when (idempotencyKey is not null)
+        {
+            DetachAddedEntities();
+            var existingPayment = await FindPaymentByIdempotencyKeyAsync(idempotencyKey, cancellationToken)
+                ?? throw new AppException("Payment could not be recorded because the idempotency key is already in use.", 409);
+
+            EnsureIdempotentPaymentMatches(existingPayment, request, paymentDate, transactionReference);
+            return existingPayment.ToResponse();
+        }
         catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("foreign key", StringComparison.OrdinalIgnoreCase) == true
                                         || ex.InnerException?.Message.Contains("violates", StringComparison.OrdinalIgnoreCase) == true)
         {
@@ -203,7 +227,8 @@ public sealed class FeeService : IFeeService
             payment.AmountPaid,
             payment.PaymentDate,
             payment.PaymentMethod,
-            payment.TransactionReference);
+            payment.TransactionReference,
+            payment.IdempotencyKey);
     }
 
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
@@ -317,6 +342,57 @@ public sealed class FeeService : IFeeService
         {
             throw new AppException("Student not found.", 404);
         }
+    }
+
+    private async Task<Payment?> FindPaymentByIdempotencyKeyAsync(string idempotencyKey, CancellationToken cancellationToken)
+    {
+        return await BuildPaymentQuery()
+            .SingleOrDefaultAsync(x => x.IdempotencyKey == idempotencyKey, cancellationToken);
+    }
+
+    private static void EnsureIdempotentPaymentMatches(
+        Payment existingPayment,
+        CreatePaymentRequest request,
+        DateTime paymentDate,
+        string? transactionReference)
+    {
+        if (existingPayment.FeeId != request.FeeId ||
+            existingPayment.AmountPaid != request.AmountPaid ||
+            existingPayment.PaymentDate != paymentDate ||
+            existingPayment.PaymentMethod != request.PaymentMethod ||
+            !string.Equals(existingPayment.TransactionReference, transactionReference, StringComparison.Ordinal))
+        {
+            throw new AppException("Idempotency key is already associated with a different payment request.", 409);
+        }
+    }
+
+    private void DetachAddedEntities()
+    {
+        foreach (var entry in _context.ChangeTracker.Entries().Where(x => x.State == EntityState.Added))
+        {
+            entry.State = EntityState.Detached;
+        }
+    }
+
+    private static string? NormalizeOptional(string? value)
+    {
+        var trimmed = value?.Trim();
+        return string.IsNullOrWhiteSpace(trimmed) ? null : trimmed;
+    }
+
+    private static DateTime NormalizeToUtc(DateTime value)
+    {
+        var utcValue = value.Kind switch
+        {
+            DateTimeKind.Utc => value,
+            DateTimeKind.Local => value.ToUniversalTime(),
+            DateTimeKind.Unspecified => DateTime.SpecifyKind(value, DateTimeKind.Utc),
+            _ => value
+        };
+
+        // PostgreSQL timestamps are stored at microsecond precision. Normalizing before
+        // persistence keeps idempotency comparisons stable across providers.
+        return new DateTime(utcValue.Ticks - (utcValue.Ticks % 10), DateTimeKind.Utc);
     }
 
     private static Domain.Enums.FeeStatus CalculateFeeStatus(Fee fee, decimal totalPaid)

@@ -30,7 +30,10 @@ public sealed class DatabaseInitializationTests : IClassFixture<SchoolManagement
                 "20260414120000_AddNotificationStudentId",
                 "20260415183000_AddSubmissionsAndAiReviews",
                 "20260415200000_AddFileUploads",
-                "20260416165039_AddAuditLogTable"
+                "20260416165039_AddAuditLogTable",
+                "20260427170000_RepairFileAndSubmissionSchema",
+                "20260509183000_AddPaymentIdempotencyKey",
+                "20260509203000_AddProductionSchemaIndexes"
             ],
             migrations);
     }

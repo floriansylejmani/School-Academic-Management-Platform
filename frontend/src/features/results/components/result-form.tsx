@@ -50,8 +50,8 @@ export function ResultForm({ mode, initialValues, isSubmitting, exams: providedE
     }
   });
 
-  const exams = providedExams ?? examsData?.items ?? [];
-  const students = providedStudents ?? studentsData?.items ?? [];
+  const exams = useMemo(() => providedExams ?? examsData?.items ?? [], [providedExams, examsData?.items]);
+  const students = useMemo(() => providedStudents ?? studentsData?.items ?? [], [providedStudents, studentsData?.items]);
   const selectedExamId = watch("examId");
   const selectedStudentId = watch("studentId");
   const selectedExam = exams.find((exam) => exam.id === selectedExamId);

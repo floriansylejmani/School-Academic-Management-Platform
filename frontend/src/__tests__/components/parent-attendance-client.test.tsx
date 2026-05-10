@@ -200,7 +200,7 @@ describe("ParentAttendanceClient — attendance data display", () => {
 
   it("renders the page title", () => {
     render(<ParentAttendanceClient />);
-    expect(screen.getByTestId("page-title")).toHaveTextContent("Child Attendance");
+    expect(screen.getByTestId("page-title")).toHaveTextContent("Attendance Record");
   });
 
   it("includes active child's name in description", () => {

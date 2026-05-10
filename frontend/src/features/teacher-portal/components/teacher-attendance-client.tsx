@@ -93,10 +93,10 @@ export function TeacherAttendanceClient() {
   const selectedDate = watch("date");
 
   const teacherId = teacherQuery.data?.id;
-  const classes = classesQuery.data?.items ?? [];
-  const students = studentsQuery.data?.items ?? [];
-  const timetableEntries = timetableQuery.data?.items ?? [];
-  const attendanceRecords = attendanceQuery.data?.items ?? [];
+  const classes = useMemo(() => classesQuery.data?.items ?? [], [classesQuery.data?.items]);
+  const students = useMemo(() => studentsQuery.data?.items ?? [], [studentsQuery.data?.items]);
+  const timetableEntries = useMemo(() => timetableQuery.data?.items ?? [], [timetableQuery.data?.items]);
+  const attendanceRecords = useMemo(() => attendanceQuery.data?.items ?? [], [attendanceQuery.data?.items]);
 
   const availableClassIds = useMemo(
     () => new Set([...timetableEntries.map((entry) => entry.classId), ...attendanceRecords.map((record) => record.classId)]),

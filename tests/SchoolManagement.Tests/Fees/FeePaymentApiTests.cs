@@ -1,5 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
+using Microsoft.EntityFrameworkCore;
+using SchoolManagement.Application.Common.Models;
 using SchoolManagement.Application.Fees;
 using SchoolManagement.Application.Parents;
 using SchoolManagement.Domain.Enums;
@@ -44,6 +46,121 @@ public sealed class FeePaymentApiTests : IClassFixture<SchoolManagementApiFactor
             new CreatePaymentRequest(fee.Id, 50m, DateTime.UtcNow, PaymentMethod.Card, "PAY-101"));
 
         Assert.Equal(50m, payment.AmountPaid);
+    }
+
+    [Fact]
+    public async Task Payment_WithIdempotencyKey_CreatesPayment()
+    {
+        await _factory.ResetDatabaseAsync();
+        using var adminClient = await _factory.CreateAuthenticatedClientAsync();
+        var student = await adminClient.CreateStudentAsync(BuildStudentRequest("fees.idempotent.create@school.com", "ST-IDEM-100"));
+        var fee = await adminClient.CreateFeeAsync(
+            new CreateFeeRequest(student.Id, "Technology", 100m, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(14)), FeeStatus.Pending));
+        var paymentDate = DateTime.UtcNow;
+
+        var payment = await adminClient.AddPaymentAsync(
+            new CreatePaymentRequest(fee.Id, 40m, paymentDate, PaymentMethod.Card, "PAY-IDEM-100", "idem-create-100"));
+
+        Assert.Equal(40m, payment.AmountPaid);
+        Assert.Equal("PAY-IDEM-100", payment.TransactionReference);
+        Assert.Equal("idem-create-100", payment.IdempotencyKey);
+
+        var updatedFee = await GetFeeAsync(adminClient, fee.Id);
+        Assert.Equal("PartiallyPaid", updatedFee.Status);
+        Assert.Equal(40m, Assert.Single(updatedFee.Payments).AmountPaid);
+    }
+
+    [Fact]
+    public async Task Payment_RetryWithSameIdempotencyKey_ReturnsExistingPaymentWithoutDuplicating()
+    {
+        await _factory.ResetDatabaseAsync();
+        using var adminClient = await _factory.CreateAuthenticatedClientAsync();
+        var student = await adminClient.CreateStudentAsync(BuildStudentRequest("fees.idempotent.retry@school.com", "ST-IDEM-101"));
+        var fee = await adminClient.CreateFeeAsync(
+            new CreateFeeRequest(student.Id, "Tuition Retry", 100m, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(14)), FeeStatus.Pending));
+        var request = new CreatePaymentRequest(fee.Id, 50m, DateTime.UtcNow, PaymentMethod.Online, "PAY-IDEM-101", "idem-retry-101");
+
+        var first = await adminClient.AddPaymentAsync(request);
+        var second = await adminClient.AddPaymentAsync(request);
+
+        Assert.Equal(first.Id, second.Id);
+        Assert.Equal(first.AmountPaid, second.AmountPaid);
+
+        var storedPayments = await _factory.ExecuteDbContextAsync(async db =>
+            await db.Payments.Where(x => x.FeeId == fee.Id).ToListAsync());
+        var storedPayment = Assert.Single(storedPayments);
+        Assert.Equal("idem-retry-101", storedPayment.IdempotencyKey);
+
+        var updatedFee = await GetFeeAsync(adminClient, fee.Id);
+        Assert.Equal("PartiallyPaid", updatedFee.Status);
+        Assert.Equal(50m, updatedFee.Payments.Sum(x => x.AmountPaid));
+    }
+
+    [Fact]
+    public async Task Payment_SameIdempotencyKeyWithDifferentAmount_ReturnsConflictAndKeepsOriginalPayment()
+    {
+        await _factory.ResetDatabaseAsync();
+        using var adminClient = await _factory.CreateAuthenticatedClientAsync();
+        var student = await adminClient.CreateStudentAsync(BuildStudentRequest("fees.idempotent.conflict.amount@school.com", "ST-IDEM-102"));
+        var fee = await adminClient.CreateFeeAsync(
+            new CreateFeeRequest(student.Id, "Books", 100m, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(14)), FeeStatus.Pending));
+        var paymentDate = DateTime.UtcNow;
+
+        var first = await adminClient.AddPaymentAsync(
+            new CreatePaymentRequest(fee.Id, 40m, paymentDate, PaymentMethod.Card, "PAY-IDEM-102", "idem-conflict-amount"));
+        var conflict = await adminClient.PostAsJsonAsync(
+            "/api/payments",
+            new CreatePaymentRequest(fee.Id, 45m, paymentDate, PaymentMethod.Card, "PAY-IDEM-102", "idem-conflict-amount"));
+
+        await conflict.AssertStatusCodeAsync(HttpStatusCode.Conflict);
+        var payload = await conflict.ReadApiResponseAsync<object>();
+        Assert.False(payload.Success);
+        Assert.Equal("Idempotency key is already associated with a different payment request.", payload.Message);
+
+        var payments = await _factory.ExecuteDbContextAsync(async db =>
+            await db.Payments.Where(x => x.FeeId == fee.Id).ToListAsync());
+        Assert.Equal(first.Id, Assert.Single(payments).Id);
+    }
+
+    [Fact]
+    public async Task Payment_SameIdempotencyKeyForDifferentFee_ReturnsConflict()
+    {
+        await _factory.ResetDatabaseAsync();
+        using var adminClient = await _factory.CreateAuthenticatedClientAsync();
+        var firstStudent = await adminClient.CreateStudentAsync(BuildStudentRequest("fees.idempotent.scope.1@school.com", "ST-IDEM-103"));
+        var secondStudent = await adminClient.CreateStudentAsync(BuildStudentRequest("fees.idempotent.scope.2@school.com", "ST-IDEM-104"));
+        var firstFee = await adminClient.CreateFeeAsync(
+            new CreateFeeRequest(firstStudent.Id, "Scope One", 100m, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(14)), FeeStatus.Pending));
+        var secondFee = await adminClient.CreateFeeAsync(
+            new CreateFeeRequest(secondStudent.Id, "Scope Two", 100m, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(14)), FeeStatus.Pending));
+        var paymentDate = DateTime.UtcNow;
+
+        await adminClient.AddPaymentAsync(
+            new CreatePaymentRequest(firstFee.Id, 30m, paymentDate, PaymentMethod.Cash, "PAY-IDEM-103", "idem-global-scope"));
+        var conflict = await adminClient.PostAsJsonAsync(
+            "/api/payments",
+            new CreatePaymentRequest(secondFee.Id, 30m, paymentDate, PaymentMethod.Cash, "PAY-IDEM-104", "idem-global-scope"));
+
+        await conflict.AssertStatusCodeAsync(HttpStatusCode.Conflict);
+        var paymentCount = await _factory.ExecuteDbContextAsync(async db =>
+            await db.Payments.CountAsync(x => x.IdempotencyKey == "idem-global-scope"));
+        Assert.Equal(1, paymentCount);
+    }
+
+    [Fact]
+    public async Task Payment_MissingIdempotencyKey_RemainsSupportedForLegacyClients()
+    {
+        await _factory.ResetDatabaseAsync();
+        using var adminClient = await _factory.CreateAuthenticatedClientAsync();
+        var student = await adminClient.CreateStudentAsync(BuildStudentRequest("fees.idempotent.legacy@school.com", "ST-IDEM-105"));
+        var fee = await adminClient.CreateFeeAsync(
+            new CreateFeeRequest(student.Id, "Legacy", 100m, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(14)), FeeStatus.Pending));
+
+        var payment = await adminClient.AddPaymentAsync(
+            new CreatePaymentRequest(fee.Id, 25m, DateTime.UtcNow, PaymentMethod.BankTransfer, "PAY-IDEM-105"));
+
+        Assert.Equal(25m, payment.AmountPaid);
+        Assert.Null(payment.IdempotencyKey);
     }
 
     [Fact]
@@ -156,4 +273,12 @@ public sealed class FeePaymentApiTests : IClassFixture<SchoolManagementApiFactor
             new DateOnly(2024, 9, 1),
             parentId,
             null);
+
+    private static async Task<FeeResponse> GetFeeAsync(HttpClient client, Guid feeId)
+    {
+        var response = await client.GetAsync($"/api/fees/{feeId}");
+        response.EnsureSuccessStatusCode();
+        var payload = await response.ReadApiResponseAsync<FeeResponse>();
+        return payload.Data ?? throw new InvalidOperationException("Fee response did not include data.");
+    }
 }

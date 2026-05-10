@@ -98,6 +98,7 @@ var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<
 var passwordResetSettings = builder.Configuration.GetSection(PasswordResetSettings.SectionName).Get<PasswordResetSettings>() ?? new PasswordResetSettings();
 var openAiSettings = builder.Configuration.GetSection(OpenAISettings.SectionName).Get<OpenAISettings>() ?? new OpenAISettings();
 StartupConfigurationValidator.ValidateJwtSettings(jwtSettings, builder.Environment.IsDevelopment());
+StartupConfigurationValidator.ValidateDatabaseInitialization(builder.Configuration, builder.Environment.IsProduction());
 StartupConfigurationValidator.ValidatePasswordResetSettings(passwordResetSettings, builder.Environment.IsDevelopment());
 StartupConfigurationValidator.ValidateOpenAISettings(openAiSettings, builder.Environment.IsDevelopment());
 

@@ -8,17 +8,10 @@ export type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   size?: "sm" | "md" | "lg";
 };
 
-const sizeClasses: Record<"sm" | "md" | "lg", string> = {
-  sm: "h-9 px-3 text-sm",
-  md: "h-11 px-4 text-sm",
-  lg: "h-13 px-5 text-base"
-};
-
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, prefix, suffix, error = false, size = "md", ...props }, ref) => {
     const hasAffix = prefix || suffix;
-    
-    // Get size classes explicitly to avoid TypeScript errors
+
     const getSizeClasses = () => {
       switch (size) {
         case "sm":
@@ -35,11 +28,12 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     return (
       <div className="relative w-full">
-        {prefix && (
+        {prefix ? (
           <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none text-slate-400">
             {prefix}
           </div>
-        )}
+        ) : null}
+
         <input
           ref={ref}
           className={cn(
@@ -58,11 +52,12 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           )}
           {...props}
         />
-        {suffix && (
+
+        {suffix ? (
           <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none text-slate-400">
             {suffix}
           </div>
-        )}
+        ) : null}
       </div>
     );
   }

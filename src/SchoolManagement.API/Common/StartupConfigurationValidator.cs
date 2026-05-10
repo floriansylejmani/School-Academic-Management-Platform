@@ -1,11 +1,18 @@
+using Microsoft.Extensions.Configuration;
 using SchoolManagement.Application.Authentication;
 using SchoolManagement.Infrastructure.AI;
 using SchoolManagement.Infrastructure.Authentication;
 
 namespace SchoolManagement.API.Common;
 
-internal static class StartupConfigurationValidator
+public static class StartupConfigurationValidator
 {
+    private static readonly string[] DemoJwtSecretKeys =
+    [
+        JwtSettings.DefaultDevelopmentSecretKey,
+        "ChangeMeForDemoOnly_AtLeast32Characters!"
+    ];
+
     public static void ValidateAllowedOrigins(string[] allowedOrigins, bool isDevelopment)
     {
         if (allowedOrigins.Length == 0 && !isDevelopment)
@@ -50,7 +57,7 @@ internal static class StartupConfigurationValidator
             throw new InvalidOperationException("Jwt:SecretKey must be at least 32 characters long.");
         }
 
-        if (!isDevelopment && jwtSettings.SecretKey == JwtSettings.DefaultDevelopmentSecretKey)
+        if (!isDevelopment && DemoJwtSecretKeys.Contains(jwtSettings.SecretKey, StringComparer.Ordinal))
         {
             throw new InvalidOperationException("Jwt:SecretKey must be changed for non-development environments.");
         }
@@ -63,6 +70,28 @@ internal static class StartupConfigurationValidator
         if (jwtSettings.RefreshTokenExpiryDays is <= 0 or > 30)
         {
             throw new InvalidOperationException("Jwt:RefreshTokenExpiryDays must be between 1 and 30.");
+        }
+    }
+
+    public static void ValidateDatabaseInitialization(IConfiguration configuration, bool isProduction)
+    {
+        if (!isProduction)
+        {
+            return;
+        }
+
+        var seedDemoData = configuration.GetValue("Database:SeedDemoData", false);
+        if (seedDemoData)
+        {
+            throw new InvalidOperationException("Database:SeedDemoData must be false in Production.");
+        }
+
+        var autoMigrate = configuration.GetValue("Database:AutoMigrate", false);
+        var allowProductionAutoMigrate = configuration.GetValue("Database:AllowProductionAutoMigrate", false);
+        if (autoMigrate && !allowProductionAutoMigrate)
+        {
+            throw new InvalidOperationException(
+                "Database:AutoMigrate must be false in Production unless Database:AllowProductionAutoMigrate is explicitly set to true.");
         }
     }
 

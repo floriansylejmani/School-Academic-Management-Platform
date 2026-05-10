@@ -25,11 +25,12 @@ services:
       db:
         condition: service_healthy
     environment:
-      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=${POSTGRES_DB:-school_management};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
-      Database__AutoMigrate: ${DATABASE_AUTO_MIGRATE:-true}
-      Database__SeedDemoData: ${DATABASE_SEED_DEMO_DATA:-true}
+      Database__AutoMigrate: ${DATABASE_AUTO_MIGRATE:-false}
+      Database__SeedDemoData: ${DATABASE_SEED_DEMO_DATA:-false}
+      Database__AllowProductionAutoMigrate: ${DATABASE_ALLOW_PRODUCTION_AUTO_MIGRATE:-false}
       Database__InitializationLockRetryDelaySeconds: ${DATABASE_INIT_LOCK_RETRY_DELAY_SECONDS:-2}
       Database__InitializationLockTimeoutSeconds: ${DATABASE_INIT_LOCK_TIMEOUT_SECONDS:-60}
       AllowedOrigins__0: ${FRONTEND_ORIGIN:-http://localhost:3000}
@@ -38,7 +39,7 @@ services:
       AllowedOrigins__3: ${FRONTEND_ORIGIN_IP_ALT:-http://127.0.0.1:3001}
       Jwt__Issuer: ${JWT_ISSUER:-SchoolManagement}
       Jwt__Audience: ${JWT_AUDIENCE:-SchoolManagement.Client}
-      Jwt__SecretKey: ${JWT_SECRET_KEY:-ChangeMeForDemoOnly_AtLeast32Characters!}
+      Jwt__SecretKey: ${JWT_SECRET_KEY:?JWT_SECRET_KEY must be set to a strong 32+ character value}
       Jwt__AccessTokenExpiryMinutes: ${JWT_ACCESS_TOKEN_EXPIRY_MINUTES:-60}
       Jwt__RefreshTokenExpiryDays: ${JWT_REFRESH_TOKEN_EXPIRY_DAYS:-7}
       PasswordReset__TokenExpiryMinutes: ${PASSWORD_RESET_TOKEN_EXPIRY_MINUTES:-30}

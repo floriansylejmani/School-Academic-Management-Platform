@@ -95,11 +95,11 @@ export function AttendanceAdminClient() {
   const selectedTeacherId = watch("teacherId");
   const selectedDate = watch("date");
 
-  const classes = classesQuery.data?.items ?? [];
-  const students = studentsQuery.data?.items ?? [];
-  const subjects = subjectsQuery.data?.items ?? [];
-  const teachers = teachersQuery.data?.items ?? [];
-  const attendanceRecords = attendanceQuery.data?.items ?? [];
+  const classes = useMemo(() => classesQuery.data?.items ?? [], [classesQuery.data?.items]);
+  const students = useMemo(() => studentsQuery.data?.items ?? [], [studentsQuery.data?.items]);
+  const subjects = useMemo(() => subjectsQuery.data?.items ?? [], [subjectsQuery.data?.items]);
+  const teachers = useMemo(() => teachersQuery.data?.items ?? [], [teachersQuery.data?.items]);
+  const attendanceRecords = useMemo(() => attendanceQuery.data?.items ?? [], [attendanceQuery.data?.items]);
 
   const selectedClass = classes.find((item) => item.id === selectedClassId);
   const classStudents = useMemo(

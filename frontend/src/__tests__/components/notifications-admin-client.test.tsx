@@ -150,7 +150,7 @@ describe("NotificationsAdminClient — initial state", () => {
 
   it("renders the page title", () => {
     render(<NotificationsAdminClient />);
-    expect(screen.getByTestId("page-title")).toHaveTextContent("Send Notifications");
+    expect(screen.getByTestId("page-title")).toHaveTextContent("Broadcast");
   });
 
   it("shows Broadcast to role and Single user mode buttons", () => {

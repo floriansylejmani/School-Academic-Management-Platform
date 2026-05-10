@@ -55,6 +55,21 @@ public sealed class GlobalExceptionMiddleware
                         .ToDictionary(x => x.Key, x => x.Select(y => y.ErrorMessage).ToArray()),
                     context.TraceIdentifier));
         }
+        catch (ArgumentException exception)
+        {
+            if (context.Response.HasStarted)
+            {
+                throw;
+            }
+
+            _logger.LogWarning(exception, "Bad request rejected. TraceId: {TraceId}", context.TraceIdentifier);
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            context.Response.ContentType = "application/json";
+            await context.Response.WriteAsJsonAsync(
+                ApiResponse<object>.Fail(
+                    exception.Message,
+                    traceId: context.TraceIdentifier));
+        }
         catch (AppException exception)
         {
             if (context.Response.HasStarted)

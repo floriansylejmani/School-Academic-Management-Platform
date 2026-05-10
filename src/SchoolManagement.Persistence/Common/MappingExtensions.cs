@@ -220,7 +220,8 @@ internal static class MappingExtensions
             entity.AmountPaid,
             entity.PaymentDate,
             entity.PaymentMethod,
-            entity.TransactionReference);
+            entity.TransactionReference,
+            entity.IdempotencyKey);
 
     public static FeeStatus CalculateFeeStatus(this Fee fee)
     {

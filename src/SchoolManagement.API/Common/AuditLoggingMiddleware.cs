@@ -64,9 +64,14 @@ public sealed class AuditLoggingMiddleware
                 var endTime = DateTime.UtcNow;
                 var duration = endTime - startTime;
 
+                context.Response.Body = originalResponseBodyStream;
+
                 // Only read response body if we need it (currently we don't)
-                responseBodyStream.Seek(0, SeekOrigin.Begin);
-                await responseBodyStream.CopyToAsync(originalResponseBodyStream);
+                if (responseBodyStream.Length > 0)
+                {
+                    responseBodyStream.Seek(0, SeekOrigin.Begin);
+                    await responseBodyStream.CopyToAsync(originalResponseBodyStream);
+                }
 
                 await LogRequestAsync(context, startTime, duration, requestBody: null);
             }

@@ -67,7 +67,7 @@ export function StudentsAdminClient() {
     }
   ];
 
-  const students = studentsQuery.data?.items ?? [];
+  const students = useMemo(() => studentsQuery.data?.items ?? [], [studentsQuery.data?.items]);
   const filteredStudents = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return students;

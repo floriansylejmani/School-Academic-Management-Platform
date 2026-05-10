@@ -1,5 +1,6 @@
 using FluentValidation;
 using SchoolManagement.Application.Common.Models;
+using SchoolManagement.Application.Common.Validation;
 using SchoolManagement.Domain.Enums;
 
 namespace SchoolManagement.Application.Students;
@@ -63,12 +64,16 @@ public sealed class CreateStudentRequestValidator : AbstractValidator<CreateStud
 {
     public CreateStudentRequestValidator()
     {
-        RuleFor(x => x.FullName).NotEmpty().MaximumLength(150);
+        RuleFor(x => x.FullName)
+            .NotEmpty()
+            .MaximumLength(150)
+            .Must(StudentValidationHelpers.NotContainMarkup)
+            .WithMessage("Full name must not contain markup.");
         RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(150);
         RuleFor(x => x.Password).NotEmpty().MinimumLength(8);
         RuleFor(x => x.StudentCode).NotEmpty().MaximumLength(50);
-        RuleFor(x => x.DateOfBirth).LessThan(DateOnly.FromDateTime(DateTime.UtcNow));
-        RuleFor(x => x.AdmissionDate).LessThanOrEqualTo(DateOnly.FromDateTime(DateTime.UtcNow));
+        RuleFor(x => x.DateOfBirth).ValidDateOfBirth();
+        RuleFor(x => x.AdmissionDate).ValidAdmissionDate();
     }
 }
 
@@ -76,10 +81,21 @@ public sealed class UpdateStudentRequestValidator : AbstractValidator<UpdateStud
 {
     public UpdateStudentRequestValidator()
     {
-        RuleFor(x => x.FullName).NotEmpty().MaximumLength(150);
+        RuleFor(x => x.FullName)
+            .NotEmpty()
+            .MaximumLength(150)
+            .Must(StudentValidationHelpers.NotContainMarkup)
+            .WithMessage("Full name must not contain markup.");
         RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(150);
         RuleFor(x => x.StudentCode).NotEmpty().MaximumLength(50);
-        RuleFor(x => x.DateOfBirth).LessThan(DateOnly.FromDateTime(DateTime.UtcNow));
-        RuleFor(x => x.AdmissionDate).LessThanOrEqualTo(DateOnly.FromDateTime(DateTime.UtcNow));
+        RuleFor(x => x.DateOfBirth).ValidDateOfBirth();
+        RuleFor(x => x.AdmissionDate).ValidAdmissionDate();
     }
+
+}
+
+internal static class StudentValidationHelpers
+{
+    public static bool NotContainMarkup(string value) =>
+        value.IndexOf('<') < 0 && value.IndexOf('>') < 0;
 }

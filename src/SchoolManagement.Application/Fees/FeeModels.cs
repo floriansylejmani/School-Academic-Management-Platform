@@ -13,7 +13,8 @@ public sealed record PaymentResponse(
     decimal AmountPaid,
     DateTime PaymentDate,
     PaymentMethod PaymentMethod,
-    string? TransactionReference);
+    string? TransactionReference,
+    string? IdempotencyKey);
 
 public sealed record FeeResponse(
     Guid Id,
@@ -30,7 +31,13 @@ public sealed record CreateFeeRequest(Guid StudentId, string FeeType, decimal Am
 
 public sealed record UpdateFeeRequest(Guid StudentId, string FeeType, decimal Amount, DateOnly DueDate, FeeStatus Status);
 
-public sealed record CreatePaymentRequest(Guid FeeId, decimal AmountPaid, DateTime PaymentDate, PaymentMethod PaymentMethod, string? TransactionReference);
+public sealed record CreatePaymentRequest(
+    Guid FeeId,
+    decimal AmountPaid,
+    DateTime PaymentDate,
+    PaymentMethod PaymentMethod,
+    string? TransactionReference,
+    string? IdempotencyKey = null);
 
 public sealed class FeeFilterRequest
 {
@@ -96,6 +103,11 @@ public sealed class CreatePaymentRequestValidator : AbstractValidator<CreatePaym
         RuleFor(x => x.AmountPaid).GreaterThan(0);
         RuleFor(x => x.PaymentDate).LessThanOrEqualTo(DateTime.UtcNow.AddMinutes(5));
         RuleFor(x => x.TransactionReference).MaximumLength(100);
+        RuleFor(x => x.IdempotencyKey)
+            .MaximumLength(100)
+            .Matches("^[A-Za-z0-9._:-]+$")
+            .When(x => !string.IsNullOrWhiteSpace(x.IdempotencyKey))
+            .WithMessage("IdempotencyKey may contain only letters, numbers, dots, underscores, colons, and hyphens.");
     }
 }
 

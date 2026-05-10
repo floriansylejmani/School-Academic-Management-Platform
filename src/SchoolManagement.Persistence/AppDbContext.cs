@@ -145,6 +145,7 @@ public sealed class AppDbContext : DbContext
         modelBuilder.Entity<AttendanceRecord>(entity =>
         {
             entity.HasIndex(x => x.Date);
+            entity.HasIndex(x => new { x.StudentId, x.ClassId, x.Date });
             entity.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
             entity.Property(x => x.Remarks).HasMaxLength(250);
             entity.HasOne(x => x.Student).WithMany(x => x.AttendanceRecords).HasForeignKey(x => x.StudentId);
@@ -225,6 +226,7 @@ public sealed class AppDbContext : DbContext
         modelBuilder.Entity<Fee>(entity =>
         {
             entity.HasIndex(x => x.StudentId);
+            entity.HasIndex(x => new { x.Status, x.DueDate });
             entity.Property(x => x.FeeType).HasMaxLength(100).IsRequired();
             entity.Property(x => x.Amount).HasPrecision(10, 2);
             entity.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
@@ -234,8 +236,12 @@ public sealed class AppDbContext : DbContext
 
         modelBuilder.Entity<Payment>(entity =>
         {
+            entity.HasIndex(x => x.IdempotencyKey)
+                .IsUnique()
+                .HasFilter("\"IdempotencyKey\" IS NOT NULL");
             entity.Property(x => x.AmountPaid).HasPrecision(10, 2);
             entity.Property(x => x.TransactionReference).HasMaxLength(100);
+            entity.Property(x => x.IdempotencyKey).HasMaxLength(100);
             entity.Property(x => x.PaymentMethod).HasConversion<string>().HasMaxLength(30);
             entity.ToTable(t => t.HasCheckConstraint("CK_Payment_AmountPaid", "\"AmountPaid\" > 0"));
             entity.HasOne(x => x.Fee).WithMany(x => x.Payments).HasForeignKey(x => x.FeeId);

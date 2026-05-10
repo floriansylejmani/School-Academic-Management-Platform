@@ -77,11 +77,13 @@ public sealed class StudentApiTests : IClassFixture<SchoolManagementApiFactory>
         await adminClient.CreateStudentAsync(BuildStudentRequest("student.list.1@school.com", "ST-040"));
         await adminClient.CreateStudentAsync(BuildStudentRequest("student.list.2@school.com", "ST-041"));
 
-        var response = await adminClient.GetAsync("/api/students?pageNumber=1&pageSize=10");
+        var response = await adminClient.GetAsync("/api/students?pageNumber=1&pageSize=100");
 
         response.EnsureSuccessStatusCode();
         var payload = await response.ReadApiResponseAsync<PagedResponse<StudentResponse>>();
         Assert.True(payload.Data!.TotalCount >= 2);
+        Assert.Equal(1, payload.Data.PageNumber);
+        Assert.Equal(100, payload.Data.PageSize);
         Assert.Contains(payload.Data.Items, x => x.Email == "student.list.1@school.com");
         Assert.Contains(payload.Data.Items, x => x.Email == "student.list.2@school.com");
     }

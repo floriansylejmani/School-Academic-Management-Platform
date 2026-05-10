@@ -27,7 +27,7 @@ export function TeacherTimetableClient() {
   const [selectedDay, setSelectedDay] = useState("");
   const [selectedClassId, setSelectedClassId] = useState("");
 
-  const timetableEntries = timetableQuery.data?.items ?? [];
+  const timetableEntries = useMemo(() => timetableQuery.data?.items ?? [], [timetableQuery.data?.items]);
 
   const availableClasses = useMemo(() => {
     const classes = new Map<string, { id: string; name: string }>();

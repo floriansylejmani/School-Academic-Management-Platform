@@ -7,6 +7,6 @@ public sealed class PaginationRequestValidator : AbstractValidator<PaginationReq
     public PaginationRequestValidator()
     {
         RuleFor(x => x.PageNumber).GreaterThan(0);
-        RuleFor(x => x.PageSize).InclusiveBetween(1, 1000);
+        RuleFor(x => x.PageSize).InclusiveBetween(1, 100);
     }
 }

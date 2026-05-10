@@ -198,7 +198,7 @@ describe("ParentFeesClient — fee data display", () => {
 
   it("renders the page title", () => {
     render(<ParentFeesClient />);
-    expect(screen.getByTestId("page-title")).toHaveTextContent("Fees");
+    expect(screen.getByTestId("page-title")).toHaveTextContent("Fee Statement");
   });
 
   it("includes active child's name in description", () => {

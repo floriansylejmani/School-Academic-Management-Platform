@@ -10,6 +10,7 @@ public sealed class Payment : BaseEntity
     public DateTime PaymentDate { get; set; }
     public PaymentMethod PaymentMethod { get; set; }
     public string? TransactionReference { get; set; }
+    public string? IdempotencyKey { get; set; }
 
     public Fee? Fee { get; set; }
 }

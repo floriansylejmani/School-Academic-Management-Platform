@@ -136,7 +136,7 @@ export function SubmissionsReviewClient() {
     });
   }, [aiForm, reviewForm, selectedSubmission]);
 
-  const submissions = submissionsQuery.data?.items ?? [];
+  const submissions = useMemo(() => submissionsQuery.data?.items ?? [], [submissionsQuery.data?.items]);
   const examOptions = useMemo(
     () =>
       Array.from(new Map(submissions.map((submission) => [submission.examId, submission])).values()).sort((left, right) =>

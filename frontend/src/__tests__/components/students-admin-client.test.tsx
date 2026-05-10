@@ -113,7 +113,7 @@ describe("StudentsAdminClient — create modal", () => {
     render(<StudentsAdminClient />);
     fireEvent.click(screen.getByTestId("page-action"));
     expect(screen.getByTestId("modal")).toBeInTheDocument();
-    expect(screen.getByTestId("modal")).toHaveAttribute("data-title", "Create student");
+    expect(screen.getByTestId("modal")).toHaveAttribute("data-title", "Add student");
   });
 
   it("closes after a successful submission", async () => {

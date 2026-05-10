@@ -99,6 +99,12 @@ List endpoints that support pagination accept the following query parameters:
 | `pageNumber` | int | 1 | — |
 | `pageSize` | int | 10 | 100 |
 
+Validation rules:
+- `pageNumber` must be greater than or equal to 1
+- `pageSize` must be between 1 and 100
+- invalid values return `400 Bad Request` with the standard validation failure envelope
+- valid values are not silently changed by the API
+
 Paginated responses use this shape wrapped in the standard `data` field:
 
 ```json
@@ -1042,11 +1048,19 @@ Paginated list with optional filters.
   "amountPaid": 150.00,
   "paymentDate": "2026-04-11T14:30:00Z",
   "paymentMethod": "Card",
-  "transactionReference": "TXN-20260411-001"
+  "transactionReference": "TXN-20260411-001",
+  "idempotencyKey": "pay_20260411_student123_fee456_attempt1"
 }
 ```
 
 `paymentMethod` accepts: `Cash`, `Card`, `BankTransfer`, `Online`
+
+`idempotencyKey` is optional for legacy clients but strongly recommended for every payment creation request. The frontend should generate one stable key per payment attempt and reuse that same key when retrying after a timeout, network failure, or double-click.
+
+Retry behavior:
+- first request with a new `idempotencyKey` records the payment
+- retrying the same payment details with the same key returns the existing payment and does not create another row
+- reusing the same key with different payment details returns `409 Conflict`
 
 **Response 200**
 ```json
@@ -1062,7 +1076,8 @@ Paginated list with optional filters.
     "amountPaid": 150.00,
     "paymentDate": "2026-04-11T14:30:00Z",
     "paymentMethod": "Card",
-    "transactionReference": "TXN-20260411-001"
+    "transactionReference": "TXN-20260411-001",
+    "idempotencyKey": "pay_20260411_student123_fee456_attempt1"
   }
 }
 ```
