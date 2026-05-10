@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { resultsService } from "@/services/results.service";
 import { useToast } from "@/hooks/use-toast";
 import { getApiErrorMessage } from "@/utils/api";
+import { MAX_PAGE_SIZE } from "@/utils/pagination";
 import type { CreateResultDto, UpdateResultDto } from "@/features/results/types/results.types";
 
 export const resultsQueryKey = ["results"] as const;
@@ -11,7 +12,7 @@ export const resultsQueryKey = ["results"] as const;
 export function useResults() {
   return useQuery({
     queryKey: resultsQueryKey,
-    queryFn: () => resultsService.getAll({ pageNumber: 1, pageSize: 200 })
+    queryFn: () => resultsService.getAll({ pageNumber: 1, pageSize: MAX_PAGE_SIZE })
   });
 }
 

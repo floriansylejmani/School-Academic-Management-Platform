@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { AdminDashboardClient } from "@/features/dashboard/admin-dashboard-client";
 
@@ -197,6 +197,8 @@ vi.mock("lucide-react", () => ({
 describe("AdminDashboardClient", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-04-10T14:00:00"));
 
     kpisState = {
       isLoading: false,
@@ -280,6 +282,10 @@ describe("AdminDashboardClient", () => {
         totalCount: 1
       }
     };
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("renders the Good afternoon, Admin ?? header and KPI cards", () => {

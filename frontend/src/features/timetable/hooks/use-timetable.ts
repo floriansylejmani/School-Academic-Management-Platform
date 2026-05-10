@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { timetableService } from "@/services/timetable.service";
 import { useToast } from "@/hooks/use-toast";
 import { getApiErrorMessage } from "@/utils/api";
+import { MAX_PAGE_SIZE } from "@/utils/pagination";
 import type { CreateTimetableEntryDto, UpdateTimetableEntryDto } from "@/features/timetable/types/timetable.types";
 
 export const timetableQueryKey = ["timetable"] as const;
@@ -11,7 +12,7 @@ export const timetableQueryKey = ["timetable"] as const;
 export function useTimetable() {
   return useQuery({
     queryKey: timetableQueryKey,
-    queryFn: () => timetableService.getAll({ pageNumber: 1, pageSize: 200 })
+    queryFn: () => timetableService.getAll({ pageNumber: 1, pageSize: MAX_PAGE_SIZE })
   });
 }
 

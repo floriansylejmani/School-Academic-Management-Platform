@@ -3,6 +3,7 @@ import type { AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from 
 import { useAuthStore } from "@/store/auth.store";
 import { API_BASE_URL } from "@/services/apiConfig";
 import { CSRF_COOKIE_NAME, getCookieValue } from "@/utils/cookies";
+import { normalizePaginationParams } from "@/utils/pagination";
 
 export interface AppAxiosRequestConfig extends AxiosRequestConfig {
   skipAuthRefresh?: boolean;
@@ -43,6 +44,8 @@ export const api = axios.create({
 export const apiClient = api;
 
 api.interceptors.request.use((config) => {
+  config.params = normalizePaginationParams(config.params);
+
   if (typeof window !== "undefined" && isUnsafeMethod(config.method)) {
     const csrfToken = getCookieValue(CSRF_COOKIE_NAME);
     if (csrfToken) {

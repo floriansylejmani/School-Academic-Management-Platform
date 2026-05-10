@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { attendanceService } from "@/services/attendance.service";
 import { getApiErrorMessage } from "@/utils/api";
+import { MAX_PAGE_SIZE } from "@/utils/pagination";
 import type {
   CreateAttendanceDto,
   UpdateAttendanceDto
@@ -14,7 +15,7 @@ export const attendanceQueryKey = ["attendance"] as const;
 export function useAttendance() {
   return useQuery({
     queryKey: attendanceQueryKey,
-    queryFn: () => attendanceService.getAll({ pageNumber: 1, pageSize: 1000 })
+    queryFn: () => attendanceService.getAll({ pageNumber: 1, pageSize: MAX_PAGE_SIZE })
   });
 }
 

@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { examsService } from "@/services/exams.service";
 import { useToast } from "@/hooks/use-toast";
 import { getApiErrorMessage } from "@/utils/api";
+import { MAX_PAGE_SIZE } from "@/utils/pagination";
 import type { CreateExamDto, UpdateExamDto } from "@/features/exams/types/exams.types";
 
 export const examsQueryKey = ["exams"] as const;
@@ -11,7 +12,7 @@ export const examsQueryKey = ["exams"] as const;
 export function useExams() {
   return useQuery({
     queryKey: examsQueryKey,
-    queryFn: () => examsService.getAll({ pageNumber: 1, pageSize: 200 })
+    queryFn: () => examsService.getAll({ pageNumber: 1, pageSize: MAX_PAGE_SIZE })
   });
 }
 
