@@ -53,7 +53,7 @@ GitHub Actions verifies the frontend, core backend suite, and PostgreSQL/Testcon
 
 ## Application Screenshots
 
-Screenshots are expected in `docs/screenshots/`.
+Verified application screenshots are included in `docs/screenshots/`.
 
 | Login                                | Admin Dashboard                                          |
 | ------------------------------------ | -------------------------------------------------------- |
