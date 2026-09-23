@@ -1,5 +1,6 @@
 # School Management System - Enterprise Edition
 
+![CI](https://github.com/floriansylejmani/School-Academic-Management-Platform/actions/workflows/ci.yml/badge.svg)
 ![.NET 9](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet)
 ![Next.js 15](https://img.shields.io/badge/Next.js-15-000000?logo=nextdotjs)
 ![PostgreSQL 16](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql)
