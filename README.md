@@ -47,6 +47,8 @@ Educational institutions often rely on disconnected tools for administration, co
 | Pagination validation tests        |               **Passed** |
 | Startup configuration safety tests |               **Passed** |
 
+GitHub Actions verifies the frontend, core backend suite, and PostgreSQL/Testcontainers integration suite on pull requests and pushes to `main`. The CI badge above is the live source of truth for the current branch status.
+
 ---
 
 ## Application Screenshots
@@ -186,7 +188,7 @@ Demo data is created only when `DATABASE_SEED_DEMO_DATA=true` in a non-productio
 ```bash
 # Prerequisites
 # - .NET SDK 9
-# - Node.js 22 LTS
+# - Node.js 24 LTS
 # - PostgreSQL 16
 
 # Backend
@@ -492,6 +494,7 @@ The default SQLite-backed backend tests provide fast API regression coverage. Th
 - **[Frontend Guide](FRONTEND.md)**: Frontend structure and customization guidance
 - **[Database Structure](DATABASE_STRUCTURE.md)**: Database schema reference
 - **[Production Deployment](DEPLOYMENT_PRODUCTION.md)**: Production-oriented deployment details
+- **[Security Policy](SECURITY.md)**: Vulnerability reporting and secure configuration guidance
 
 ---
 
